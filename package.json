@@ -1,0 +1,32 @@
+{
+  "name": "react-realtime-chat",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Chat em tempo real com React, Socket.io e TypeScript em um monorepo npm workspaces",
+  "type": "module",
+  "license": "MIT",
+  "author": "Bruno Vinicius Isaac Costa (https://github.com/BrunoICosta)",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "lint": "eslint . && prettier --check .",
+    "format": "prettier --write .",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "build": "npm run build --workspaces --if-present"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.9.0",
+    "eslint-config-prettier": "^10.1.8",
+    "globals": "^17.11.0",
+    "prettier": "^3.9.6",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.67.0"
+  }
+}
