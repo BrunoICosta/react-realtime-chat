@@ -1,8 +1,16 @@
 import cors from 'cors'
 import express, { type ErrorRequestHandler } from 'express'
+import { createLoginRouter } from './auth/login.route.js'
+import type { TokenService } from './auth/token.js'
 import type { ServerConfig } from './config.js'
 
-export function createApp(config: ServerConfig) {
+export interface AppDeps {
+  config: ServerConfig
+  tokens: TokenService
+  isNicknameTaken: (nickname: string) => boolean
+}
+
+export function createApp({ config, tokens, isNicknameTaken }: AppDeps) {
   const app = express()
 
   app.disable('x-powered-by')
@@ -12,6 +20,7 @@ export function createApp(config: ServerConfig) {
   app.get('/api/health', (_req, res) => {
     res.json({ status: 'ok', uptime: Math.round(process.uptime()) })
   })
+  app.use('/api', createLoginRouter({ tokens, isNicknameTaken }))
 
   app.use((_req, res) => {
     res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Rota não encontrada' } })
