@@ -2,9 +2,11 @@ import {
   createRoomSchema,
   roomRefSchema,
   sendMessageSchema,
+  type Ack,
   type JoinRoomResult,
 } from '@chat/shared'
 import type { ChatStore } from '../chat/chat-store.js'
+import type { RateLimitedAction, SocketRateLimiter } from '../chat/rate-limiter.js'
 import type { TypingTracker } from '../chat/typing-tracker.js'
 import { fail, ok, parsePayload, safeAck } from './ack.js'
 import type { ChatIo, ChatSocket } from './types.js'
@@ -13,11 +15,24 @@ export interface ChatHandlerDeps {
   io: ChatIo
   store: ChatStore
   typing: TypingTracker
+  rateLimit: SocketRateLimiter
 }
 
 export function registerChatHandlers(socket: ChatSocket, deps: ChatHandlerDeps) {
-  const { io, store, typing } = deps
+  const { io, store, typing, rateLimit } = deps
   const { user } = socket.data
+
+  /** Returns true (and answers the ack, if any) when the socket exceeded its budget. */
+  const isLimited = (action: RateLimitedAction, ack?: Ack<never>): boolean => {
+    const result = rateLimit(action)
+    if (result.allowed) return false
+    ack?.(
+      fail('RATE_LIMITED', 'Calma! Você está enviando rápido demais.', {
+        retryAfterMs: result.retryAfterMs,
+      }),
+    )
+    return true
+  }
 
   const broadcastPresence = (roomId: string) => {
     io.to(roomId).emit('presence:update', { roomId, users: store.getOnlineUsers(roomId) })
@@ -26,6 +41,7 @@ export function registerChatHandlers(socket: ChatSocket, deps: ChatHandlerDeps) 
 
   socket.on('room:create', (payload, rawAck) => {
     const ack = safeAck(rawAck)
+    if (isLimited('room', ack)) return
     const parsed = parsePayload(createRoomSchema, payload)
     if (!parsed.ok) return ack(parsed.result)
 
@@ -45,6 +61,7 @@ export function registerChatHandlers(socket: ChatSocket, deps: ChatHandlerDeps) 
 
   socket.on('room:join', async (payload, rawAck) => {
     const ack = safeAck<JoinRoomResult>(rawAck)
+    if (isLimited('room', ack)) return
     const parsed = parsePayload(roomRefSchema, payload)
     if (!parsed.ok) return ack(parsed.result)
 
@@ -70,6 +87,7 @@ export function registerChatHandlers(socket: ChatSocket, deps: ChatHandlerDeps) 
   })
 
   socket.on('room:leave', async (payload) => {
+    if (isLimited('room')) return
     const parsed = parsePayload(roomRefSchema, payload)
     if (!parsed.ok) return
 
@@ -81,6 +99,7 @@ export function registerChatHandlers(socket: ChatSocket, deps: ChatHandlerDeps) 
 
   socket.on('message:send', (payload, rawAck) => {
     const ack = safeAck(rawAck)
+    if (isLimited('message', ack)) return
     const parsed = parsePayload(sendMessageSchema, payload)
     if (!parsed.ok) return ack(parsed.result)
 
@@ -96,6 +115,7 @@ export function registerChatHandlers(socket: ChatSocket, deps: ChatHandlerDeps) 
   })
 
   socket.on('typing:start', (payload) => {
+    if (isLimited('typing')) return
     const parsed = parsePayload(roomRefSchema, payload)
     if (!parsed.ok || !socket.rooms.has(parsed.data.roomId)) return
     typing.start(parsed.data.roomId, user)

@@ -2,6 +2,7 @@ import type { Server as HttpServer } from 'node:http'
 import { Server } from 'socket.io'
 import type { TokenService } from '../auth/token.js'
 import type { ChatStore } from '../chat/chat-store.js'
+import { createSocketRateLimiter, type RateLimitPolicy } from '../chat/rate-limiter.js'
 import { TypingTracker } from '../chat/typing-tracker.js'
 import type { ServerConfig } from '../config.js'
 import { createAuthMiddleware } from './auth-middleware.js'
@@ -12,7 +13,8 @@ export interface SocketServerDeps {
   config: ServerConfig
   tokens: TokenService
   store: ChatStore
-  typingTimeoutMs?: number
+  typingTimeoutMs?: number | undefined
+  rateLimits?: RateLimitPolicy | undefined
 }
 
 export function createSocketServer(httpServer: HttpServer, deps: SocketServerDeps): ChatIo {
@@ -34,7 +36,12 @@ export function createSocketServer(httpServer: HttpServer, deps: SocketServerDep
   io.on('connection', (socket) => {
     store.connect(socket.data.user, socket.id)
     socket.emit('rooms:update', store.listRooms())
-    registerChatHandlers(socket, { io, store, typing })
+    registerChatHandlers(socket, {
+      io,
+      store,
+      typing,
+      rateLimit: createSocketRateLimiter(deps.rateLimits),
+    })
   })
 
   return io

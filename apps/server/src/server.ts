@@ -3,14 +3,22 @@ import type { AddressInfo } from 'node:net'
 import { createApp } from './app.js'
 import { createTokenService } from './auth/token.js'
 import { ChatStore } from './chat/chat-store.js'
+import type { RateLimitPolicy } from './chat/rate-limiter.js'
 import type { ServerConfig } from './config.js'
 import { createSocketServer } from './socket/create-socket-server.js'
+
+export interface ChatServerOptions {
+  store?: ChatStore
+  typingTimeoutMs?: number
+  rateLimits?: RateLimitPolicy
+}
 
 /**
  * Wires HTTP + Socket.io around a fresh in-memory store.
  * Kept separate from `index.ts` so tests can boot isolated servers on random ports.
  */
-export function createChatServer(config: ServerConfig, store = new ChatStore()) {
+export function createChatServer(config: ServerConfig, options: ChatServerOptions = {}) {
+  const store = options.store ?? new ChatStore()
   const tokens = createTokenService(config.jwtSecret, config.jwtExpiresInSeconds)
   const app = createApp({
     config,
@@ -18,7 +26,13 @@ export function createChatServer(config: ServerConfig, store = new ChatStore()) 
     isNicknameTaken: (nickname) => store.isNicknameOnline(nickname),
   })
   const httpServer = createServer(app)
-  const io = createSocketServer(httpServer, { config, tokens, store })
+  const io = createSocketServer(httpServer, {
+    config,
+    tokens,
+    store,
+    typingTimeoutMs: options.typingTimeoutMs,
+    rateLimits: options.rateLimits,
+  })
 
   return {
     httpServer,
