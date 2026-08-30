@@ -9,6 +9,8 @@
     "dev": "tsx watch --conditions=source src/index.ts",
     "build": "tsc -p tsconfig.build.json",
     "start": "node dist/index.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
@@ -24,6 +26,8 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^22.20.1",
-    "tsx": "^4.23.12"
+    "socket.io-client": "^4.8.3",
+    "tsx": "^4.23.12",
+    "vitest": "^4.1.11"
   }
 }
