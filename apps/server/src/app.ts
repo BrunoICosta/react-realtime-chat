@@ -2,7 +2,7 @@ import cors from 'cors'
 import express, { type ErrorRequestHandler } from 'express'
 import { createLoginRouter } from './auth/login.route.js'
 import type { TokenService } from './auth/token.js'
-import type { ServerConfig } from './config.js'
+import { createOriginCheck, type ServerConfig } from './config.js'
 
 export interface AppDeps {
   config: ServerConfig
@@ -14,7 +14,7 @@ export function createApp({ config, tokens, isNicknameTaken }: AppDeps) {
   const app = express()
 
   app.disable('x-powered-by')
-  app.use(cors({ origin: config.corsOrigins }))
+  app.use(cors({ origin: createOriginCheck(config) }))
   app.use(express.json({ limit: '10kb' }))
 
   app.get('/api/health', (_req, res) => {

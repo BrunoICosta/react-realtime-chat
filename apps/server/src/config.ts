@@ -40,3 +40,19 @@ export function loadConfig(source: NodeJS.ProcessEnv = process.env): ServerConfi
     jwtExpiresInSeconds: env.JWT_EXPIRES_IN_SECONDS,
   }
 }
+
+const LOCALHOST_ORIGIN = /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/
+
+/**
+ * Origin check shared by Express CORS and the Socket.io handshake. Outside production any
+ * localhost port is accepted, so Vite picking another port does not break local development.
+ */
+export function createOriginCheck(config: ServerConfig) {
+  return (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+    const allowed =
+      origin === undefined ||
+      config.corsOrigins.includes(origin) ||
+      (config.env !== 'production' && LOCALHOST_ORIGIN.test(origin))
+    callback(null, allowed)
+  }
+}

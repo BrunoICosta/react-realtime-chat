@@ -14,6 +14,8 @@
     "apps/*"
   ],
   "scripts": {
+    "dev": "concurrently -k -n server,web -c cyan,magenta \"npm run dev -w @chat/server\" \"npm run dev -w @chat/web\"",
+    "start": "npm start -w @chat/server",
     "lint": "eslint . && prettier --check .",
     "format": "prettier --write .",
     "typecheck": "npm run typecheck --workspaces --if-present",
@@ -22,6 +24,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "concurrently": "^10.0.5",
     "eslint": "^10.9.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^7.1.1",

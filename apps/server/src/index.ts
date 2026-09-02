@@ -1,6 +1,13 @@
 import { loadConfig } from './config.js'
 import { createChatServer } from './server.js'
 
+try {
+  // Optional local overrides (see .env.example). Real deployments set env vars directly.
+  process.loadEnvFile()
+} catch {
+  // No .env file: keep the process environment as is.
+}
+
 const config = loadConfig()
 const server = createChatServer(config)
 

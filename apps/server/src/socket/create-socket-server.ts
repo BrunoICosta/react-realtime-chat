@@ -4,7 +4,7 @@ import type { TokenService } from '../auth/token.js'
 import type { ChatStore } from '../chat/chat-store.js'
 import { createSocketRateLimiter, type RateLimitPolicy } from '../chat/rate-limiter.js'
 import { TypingTracker } from '../chat/typing-tracker.js'
-import type { ServerConfig } from '../config.js'
+import { createOriginCheck, type ServerConfig } from '../config.js'
 import { createAuthMiddleware } from './auth-middleware.js'
 import { registerChatHandlers } from './chat-handlers.js'
 import type { ChatIo } from './types.js'
@@ -21,7 +21,7 @@ export function createSocketServer(httpServer: HttpServer, deps: SocketServerDep
   const { config, tokens, store } = deps
 
   const io: ChatIo = new Server(httpServer, {
-    cors: { origin: config.corsOrigins },
+    cors: { origin: createOriginCheck(config) },
     // Chat payloads are tiny; refuse anything big before it reaches the handlers.
     maxHttpBufferSize: 16 * 1024,
   })
