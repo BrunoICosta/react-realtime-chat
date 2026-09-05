@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { clearSession, loadSession, saveSession } from './core/session/session-storage'
 import type { Session } from './core/transport/chat-transport'
 import { createTransport } from './core/transport/create-transport'
 import { useTheme } from './core/theme/use-theme'
 import { LoginScreen } from './features/auth/LoginScreen'
+import { ChatScreen } from './features/chat/ChatScreen'
+import { ChatProvider } from './features/chat/state/ChatProvider'
 
 const transport = createTransport()
 
@@ -16,11 +18,11 @@ export function App() {
     setSession(next)
   }
 
-  function handleLogout() {
-    transport.disconnect()
+  // Stable so the provider does not reconnect when App re-renders (e.g. theme change).
+  const handleLogout = useCallback(() => {
     clearSession(transport.mode)
     setSession(null)
-  }
+  }, [])
 
   if (!session) {
     return (
@@ -34,11 +36,8 @@ export function App() {
   }
 
   return (
-    <main style={{ padding: 24 }}>
-      <p>Olá, {session.user.nickname}!</p>
-      <button type="button" className="btn btn--ghost" onClick={handleLogout}>
-        Sair
-      </button>
-    </main>
+    <ChatProvider transport={transport} session={session} onLogout={handleLogout}>
+      <ChatScreen />
+    </ChatProvider>
   )
 }
