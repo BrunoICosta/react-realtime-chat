@@ -1,0 +1,249 @@
+.messages__timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0;
+  padding: 16px 12px 8px;
+  list-style: none;
+}
+
+.messages__day {
+  position: sticky;
+  top: 8px;
+  z-index: 1;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.messages__day span {
+  padding: 3px 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+/* Groups ------------------------------------------------------------------- */
+
+.msg-group {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  max-width: 100%;
+}
+
+.msg-group[data-own] {
+  justify-content: flex-end;
+}
+
+.msg-group__body {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  max-width: min(78%, 640px);
+}
+
+.msg-group[data-own] .msg-group__body {
+  justify-items: end;
+}
+
+.msg-group__meta {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 0 4px;
+  font-size: 0.8125rem;
+}
+
+.msg-group__author {
+  font-weight: 700;
+  filter: saturate(0.9);
+}
+
+:root[data-theme='dark'] .msg-group__author {
+  filter: brightness(1.25) saturate(0.9);
+}
+
+.msg-group__meta time {
+  color: var(--text-subtle);
+  font-size: 0.75rem;
+}
+
+.msg-group__messages {
+  display: grid;
+  gap: 3px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.msg-group[data-own] .msg-group__messages {
+  justify-items: end;
+}
+
+/* Bubbles ------------------------------------------------------------------ */
+
+.msg {
+  display: grid;
+  justify-items: start;
+  min-width: 0;
+}
+
+.msg-group[data-own] .msg {
+  justify-items: end;
+}
+
+.msg__bubble {
+  max-width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px 16px 16px 4px;
+  background: var(--bubble-other);
+  box-shadow: var(--shadow-sm);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.msg:first-child .msg__bubble {
+  border-top-left-radius: 16px;
+}
+
+.msg-group[data-own] .msg__bubble {
+  border-color: transparent;
+  border-radius: 16px 4px 4px 16px;
+  background: var(--bubble-own);
+  color: var(--bubble-own-text);
+}
+
+.msg-group[data-own] .msg:first-child .msg__bubble {
+  border-top-right-radius: 16px;
+}
+
+.msg-group[data-own] .msg:last-child .msg__bubble {
+  border-bottom-right-radius: 16px;
+}
+
+.msg__bubble a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.msg__bubble[data-emoji] {
+  padding: 0 4px;
+  border: 0;
+  background: transparent !important;
+  box-shadow: none;
+  font-size: 2.25rem;
+  line-height: 1.2;
+}
+
+.msg[data-status='pending'] .msg__bubble {
+  opacity: 0.6;
+}
+
+.msg[data-status='failed'] .msg__bubble {
+  outline: 2px solid var(--danger);
+  outline-offset: 1px;
+}
+
+.msg__state {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 4px 0;
+  color: var(--text-subtle);
+  font-size: 0.75rem;
+}
+
+.msg__state--failed {
+  color: var(--danger);
+}
+
+.msg__state button {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 0 4px;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+/* States ------------------------------------------------------------------- */
+
+.messages__state {
+  display: grid;
+  min-height: 100%;
+  place-content: center;
+  justify-items: center;
+  gap: 4px;
+  padding: 24px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.messages__empty-icon {
+  font-size: 2.5rem;
+  margin-bottom: 4px;
+}
+
+.messages__skeleton {
+  display: grid;
+  gap: 18px;
+  width: min(100%, 420px);
+}
+
+.messages__skeleton-row {
+  display: flex;
+  gap: 10px;
+}
+
+.messages__skeleton-row > span {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+
+.messages__skeleton-row div {
+  display: grid;
+  flex: 1;
+  gap: 6px;
+}
+
+.messages__skeleton-row div span:first-child {
+  width: 30%;
+  height: 12px;
+}
+
+.messages__skeleton-row div span:last-child {
+  width: 80%;
+  height: 34px;
+}
+
+.messages__skeleton-row span {
+  border-radius: 8px;
+  background: linear-gradient(90deg, var(--surface-2), var(--surface-3), var(--surface-2));
+  background-size: 200% 100%;
+  animation: shimmer 1.2s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+
+@media (min-width: 640px) {
+  .messages__timeline {
+    padding: 20px 24px 8px;
+  }
+}

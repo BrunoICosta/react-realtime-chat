@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { Theme } from '../../core/theme/use-theme'
 import { Icon } from '../../shared/components/Icon'
 import { ThemeToggle } from '../../shared/components/ThemeToggle'
+import { MessageList } from './components/MessageList'
 import { RoomsSidebar } from './components/RoomsSidebar'
 import { useActiveRoom, useChatActions, useChatState } from './state/use-chat'
 import './ChatScreen.css'
@@ -12,9 +13,9 @@ interface ChatScreenProps {
 }
 
 export function ChatScreen({ theme, onToggleTheme }: ChatScreenProps) {
-  const { rooms } = useChatState()
+  const { rooms, self } = useChatState()
   const { roomId, room } = useActiveRoom()
-  const { sendMessage, leaveRoom } = useChatActions()
+  const { sendMessage, leaveRoom, retryMessage } = useChatActions()
   const [drawerOpen, setDrawerOpen] = useState(false)
 
   const summary = rooms.find((candidate) => candidate.id === roomId)
@@ -82,13 +83,14 @@ export function ChatScreen({ theme, onToggleTheme }: ChatScreenProps) {
         </header>
 
         <div className="chat__body">
-          <ul>
-            {room.messages.map((message) => (
-              <li key={message.id}>
-                <strong>{message.author.nickname}:</strong> {message.text}
-              </li>
-            ))}
-          </ul>
+          <MessageList
+            roomName={roomName}
+            messages={room.messages}
+            selfId={self.id}
+            loading={room.loading}
+            error={room.error}
+            onRetry={retryMessage}
+          />
         </div>
 
         <form
