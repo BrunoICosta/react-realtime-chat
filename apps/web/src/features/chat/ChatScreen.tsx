@@ -1,48 +1,108 @@
+import { useEffect, useState } from 'react'
+import type { Theme } from '../../core/theme/use-theme'
+import { Icon } from '../../shared/components/Icon'
+import { ThemeToggle } from '../../shared/components/ThemeToggle'
+import { RoomsSidebar } from './components/RoomsSidebar'
 import { useActiveRoom, useChatActions, useChatState } from './state/use-chat'
+import './ChatScreen.css'
 
-export function ChatScreen() {
-  const { rooms, status, self } = useChatState()
+interface ChatScreenProps {
+  theme: Theme
+  onToggleTheme: () => void
+}
+
+export function ChatScreen({ theme, onToggleTheme }: ChatScreenProps) {
+  const { rooms } = useChatState()
   const { roomId, room } = useActiveRoom()
-  const { selectRoom, sendMessage, logout } = useChatActions()
+  const { sendMessage, leaveRoom } = useChatActions()
+  const [drawerOpen, setDrawerOpen] = useState(false)
+
+  const summary = rooms.find((candidate) => candidate.id === roomId)
+  const roomName = summary?.name ?? roomId ?? ''
+
+  useEffect(() => {
+    if (!drawerOpen) return
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setDrawerOpen(false)
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [drawerOpen])
 
   return (
-    <div style={{ padding: 24, display: 'grid', gap: 16 }}>
-      <header>
-        <strong>{self.nickname}</strong> · {status}{' '}
-        <button type="button" className="btn btn--ghost" onClick={logout}>
-          Sair
-        </button>
-      </header>
-      <nav>
-        {rooms.map((summary) => (
+    <div className="chat" data-drawer={drawerOpen ? 'open' : undefined}>
+      <aside className="chat__sidebar" id="rooms-drawer" aria-label="Salas e perfil">
+        <RoomsSidebar onNavigate={() => setDrawerOpen(false)} />
+      </aside>
+      {drawerOpen && (
+        <div className="chat__scrim" aria-hidden="true" onClick={() => setDrawerOpen(false)} />
+      )}
+
+      <section className="chat__main" aria-label={roomName ? `Sala #${roomName}` : 'Conversa'}>
+        <header className="chat__header">
           <button
-            key={summary.id}
             type="button"
-            className="btn btn--ghost"
-            aria-current={summary.id === roomId}
-            onClick={() => selectRoom(summary.id)}
+            className="icon-btn chat__menu"
+            aria-label="Abrir salas"
+            aria-controls="rooms-drawer"
+            aria-expanded={drawerOpen}
+            onClick={() => setDrawerOpen(true)}
           >
-            #{summary.name} ({summary.onlineCount})
+            <Icon name="menu" />
           </button>
-        ))}
-      </nav>
-      <ul>
-        {room.messages.map((message) => (
-          <li key={message.id}>
-            <strong>{message.author.nickname}:</strong> {message.text}
-          </li>
-        ))}
-      </ul>
-      <form
-        onSubmit={(event) => {
-          event.preventDefault()
-          const input = event.currentTarget.elements.namedItem('text') as HTMLInputElement
-          sendMessage(input.value)
-          input.value = ''
-        }}
-      >
-        <input name="text" className="input" aria-label="Mensagem" />
-      </form>
+
+          <div className="chat__room">
+            <h1 className="chat__room-name">
+              <Icon name="hash" size={18} />
+              <span>{roomName || 'Escolha uma sala'}</span>
+            </h1>
+            {room.joined && (
+              <p className="chat__room-meta">
+                {room.users.length === 1
+                  ? '1 pessoa online'
+                  : `${room.users.length} pessoas online`}
+              </p>
+            )}
+          </div>
+
+          <div className="chat__actions">
+            {roomId && room.joined && (
+              <button
+                type="button"
+                className="icon-btn"
+                onClick={() => leaveRoom(roomId)}
+                aria-label={`Sair da sala #${roomName}`}
+                title="Sair da sala"
+              >
+                <Icon name="leave" />
+              </button>
+            )}
+            <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+          </div>
+        </header>
+
+        <div className="chat__body">
+          <ul>
+            {room.messages.map((message) => (
+              <li key={message.id}>
+                <strong>{message.author.nickname}:</strong> {message.text}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <form
+          className="chat__composer-slot"
+          onSubmit={(event) => {
+            event.preventDefault()
+            const input = event.currentTarget.elements.namedItem('text') as HTMLInputElement
+            sendMessage(input.value)
+            input.value = ''
+          }}
+        >
+          <input name="text" className="input" aria-label="Mensagem" />
+        </form>
+      </section>
     </div>
   )
 }

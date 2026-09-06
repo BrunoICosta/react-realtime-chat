@@ -37,7 +37,7 @@ export function App() {
 
   return (
     <ChatProvider transport={transport} session={session} onLogout={handleLogout}>
-      <ChatScreen />
+      <ChatScreen theme={theme} onToggleTheme={toggleTheme} />
     </ChatProvider>
   )
 }

@@ -1,0 +1,125 @@
+.chat {
+  position: relative;
+  display: grid;
+  height: 100vh;
+  height: 100dvh;
+  grid-template-columns: minmax(0, 1fr);
+  overflow: hidden;
+}
+
+/* Rooms drawer: off-canvas on small screens, a fixed column from 900px. */
+.chat__sidebar {
+  position: fixed;
+  inset: 0 auto 0 0;
+  z-index: 30;
+  width: min(86vw, var(--sidebar-width));
+  border-right: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+  transform: translateX(-102%);
+  transition: transform 0.22s ease;
+  visibility: hidden;
+}
+
+.chat[data-drawer='open'] .chat__sidebar {
+  transform: none;
+  visibility: visible;
+}
+
+.chat__scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: rgb(8 10 20 / 0.45);
+  animation: fade-in 0.2s ease;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.chat__main {
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+  background: var(--bg);
+}
+
+.chat__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: var(--header-height);
+  padding: 0 8px 0 8px;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  backdrop-filter: blur(10px);
+}
+
+.chat__room {
+  flex: 1;
+  min-width: 0;
+}
+
+.chat__room-name {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.chat__room-name svg {
+  flex: none;
+  color: var(--text-subtle);
+}
+
+.chat__room-name span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chat__room-meta {
+  font-size: 0.8125rem;
+  color: var(--text-subtle);
+}
+
+.chat__actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.chat__body {
+  grid-row: 3;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+@media (min-width: 900px) {
+  .chat {
+    grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
+  }
+
+  .chat__sidebar {
+    position: static;
+    width: auto;
+    box-shadow: none;
+    transform: none;
+    visibility: visible;
+    transition: none;
+  }
+
+  .chat__scrim,
+  .chat__menu {
+    display: none;
+  }
+
+  .chat__header {
+    padding: 0 12px 0 20px;
+  }
+}
