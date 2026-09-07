@@ -1,0 +1,55 @@
+.typing {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 24px;
+  padding: 0 16px;
+  color: var(--text-muted);
+  font-size: 0.8125rem;
+}
+
+.typing__text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.typing__dots {
+  display: inline-flex;
+  gap: 3px;
+}
+
+.typing__dots span {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: typing-bounce 1.2s ease-in-out infinite;
+}
+
+.typing__dots span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.typing__dots span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes typing-bounce {
+  0%,
+  60%,
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-3px);
+  }
+}
+
+@media (min-width: 640px) {
+  .typing {
+    padding: 0 28px;
+  }
+}

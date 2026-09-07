@@ -2,8 +2,11 @@ import { useEffect, useState } from 'react'
 import type { Theme } from '../../core/theme/use-theme'
 import { Icon } from '../../shared/components/Icon'
 import { ThemeToggle } from '../../shared/components/ThemeToggle'
+import { Composer } from './components/Composer'
 import { MessageList } from './components/MessageList'
 import { RoomsSidebar } from './components/RoomsSidebar'
+import { TypingIndicator } from './components/TypingIndicator'
+import { useTypingEmitter } from './hooks/use-typing-emitter'
 import { useActiveRoom, useChatActions, useChatState } from './state/use-chat'
 import './ChatScreen.css'
 
@@ -13,9 +16,15 @@ interface ChatScreenProps {
 }
 
 export function ChatScreen({ theme, onToggleTheme }: ChatScreenProps) {
-  const { rooms, self } = useChatState()
+  const { rooms, self, status } = useChatState()
   const { roomId, room } = useActiveRoom()
-  const { sendMessage, leaveRoom, retryMessage } = useChatActions()
+  const actions = useChatActions()
+  const { sendMessage, leaveRoom, retryMessage } = actions
+  const { onActivity, stopTyping } = useTypingEmitter(
+    roomId,
+    actions.startTyping,
+    actions.stopTyping,
+  )
   const [drawerOpen, setDrawerOpen] = useState(false)
 
   const summary = rooms.find((candidate) => candidate.id === roomId)
@@ -93,17 +102,16 @@ export function ChatScreen({ theme, onToggleTheme }: ChatScreenProps) {
           />
         </div>
 
-        <form
-          className="chat__composer-slot"
-          onSubmit={(event) => {
-            event.preventDefault()
-            const input = event.currentTarget.elements.namedItem('text') as HTMLInputElement
-            sendMessage(input.value)
-            input.value = ''
-          }}
-        >
-          <input name="text" className="input" aria-label="Mensagem" />
-        </form>
+        <TypingIndicator users={room.typing} />
+        <Composer
+          key={roomId ?? 'none'}
+          roomName={roomName}
+          disabled={status !== 'connected' || !room.joined}
+          disabledReason={status === 'connected' ? 'Entrando na sala…' : 'Sem conexão…'}
+          onSend={sendMessage}
+          onTyping={onActivity}
+          onStopTyping={stopTyping}
+        />
       </section>
     </div>
   )
