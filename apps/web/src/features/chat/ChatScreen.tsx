@@ -4,8 +4,10 @@ import { Icon } from '../../shared/components/Icon'
 import { ThemeToggle } from '../../shared/components/ThemeToggle'
 import { Composer } from './components/Composer'
 import { MessageList } from './components/MessageList'
+import { NewMessagesPill } from './components/NewMessagesPill'
 import { RoomsSidebar } from './components/RoomsSidebar'
 import { TypingIndicator } from './components/TypingIndicator'
+import { useAutoScroll } from './hooks/use-auto-scroll'
 import { useTypingEmitter } from './hooks/use-typing-emitter'
 import { useActiveRoom, useChatActions, useChatState } from './state/use-chat'
 import './ChatScreen.css'
@@ -26,6 +28,11 @@ export function ChatScreen({ theme, onToggleTheme }: ChatScreenProps) {
     actions.stopTyping,
   )
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const { containerRef, onScroll, unseen, scrollToBottom } = useAutoScroll<HTMLDivElement>({
+    roomId,
+    messages: room.messages,
+    selfId: self.id,
+  })
 
   const summary = rooms.find((candidate) => candidate.id === roomId)
   const roomName = summary?.name ?? roomId ?? ''
@@ -91,15 +98,26 @@ export function ChatScreen({ theme, onToggleTheme }: ChatScreenProps) {
           </div>
         </header>
 
-        <div className="chat__body">
-          <MessageList
-            roomName={roomName}
-            messages={room.messages}
-            selfId={self.id}
-            loading={room.loading}
-            error={room.error}
-            onRetry={retryMessage}
-          />
+        <div className="chat__body-wrap">
+          <div
+            ref={containerRef}
+            className="chat__body"
+            onScroll={onScroll}
+            role="log"
+            aria-label={roomName ? `Mensagens de #${roomName}` : 'Mensagens'}
+            aria-relevant="additions"
+            tabIndex={0}
+          >
+            <MessageList
+              roomName={roomName}
+              messages={room.messages}
+              selfId={self.id}
+              loading={room.loading}
+              error={room.error}
+              onRetry={retryMessage}
+            />
+          </div>
+          <NewMessagesPill count={unseen} onClick={() => scrollToBottom()} />
         </div>
 
         <TypingIndicator users={room.typing} />

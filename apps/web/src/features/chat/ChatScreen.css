@@ -94,10 +94,51 @@
   gap: 2px;
 }
 
-.chat__body {
+.chat__body-wrap {
+  position: relative;
   grid-row: 3;
   min-height: 0;
+}
+
+.chat__body {
+  height: 100%;
   overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.chat__body:focus-visible {
+  box-shadow: inset var(--focus-ring);
+}
+
+.new-messages-pill {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  box-shadow: var(--shadow-md);
+  font-size: 0.8125rem;
+  font-weight: 700;
+  transform: translateX(-50%);
+  animation: pill-in 0.2s ease-out;
+}
+
+.new-messages-pill:hover {
+  background: var(--accent-strong);
+}
+
+@keyframes pill-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
 }
 
 @media (min-width: 900px) {
