@@ -25,18 +25,38 @@
   visibility: visible;
 }
 
+/* People panel: off-canvas from the right, a third column from 1200px. */
+.chat__users {
+  position: fixed;
+  inset: 0 0 0 auto;
+  z-index: 30;
+  width: min(86vw, var(--users-width));
+  border-left: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
+  transform: translateX(102%);
+  transition: transform 0.22s ease;
+  visibility: hidden;
+}
+
+.chat[data-users='open'] .chat__users {
+  transform: none;
+  visibility: visible;
+}
+
 .chat__scrim {
   position: fixed;
   inset: 0;
   z-index: 20;
   background: rgb(8 10 20 / 0.45);
-  animation: fade-in 0.2s ease;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
 }
 
-@keyframes fade-in {
-  from {
-    opacity: 0;
-  }
+.chat[data-drawer='open'] .chat__scrim,
+.chat[data-users='open'] .chat__scrim {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .chat__main {
@@ -155,12 +175,38 @@
     transition: none;
   }
 
-  .chat__scrim,
   .chat__menu {
     display: none;
   }
 
+  /* Only the people panel can still be an overlay at this width. */
+  .chat[data-drawer='open']:not([data-users='open']) .chat__scrim {
+    opacity: 0;
+    pointer-events: none;
+  }
+
   .chat__header {
     padding: 0 12px 0 20px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .chat[data-users='open'] {
+    grid-template-columns: var(--sidebar-width) minmax(0, 1fr) var(--users-width);
+  }
+
+  .chat__users {
+    box-shadow: none;
+    transition: none;
+  }
+
+  .chat[data-users='open'] .chat__users {
+    position: static;
+    width: auto;
+  }
+
+  .chat__scrim,
+  .online__close {
+    display: none;
   }
 }

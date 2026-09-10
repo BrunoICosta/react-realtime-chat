@@ -1,0 +1,71 @@
+.connection-banner-slot {
+  grid-row: 2;
+}
+
+.connection-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 7px 16px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  animation: banner-in 0.2s ease-out;
+}
+
+.connection-banner .spinner {
+  width: 14px;
+  height: 14px;
+}
+
+.connection-banner[data-tone='warning'] {
+  background: var(--warning-soft);
+  color: var(--warning);
+}
+
+.connection-banner[data-tone='info'] {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.connection-banner[data-tone='success'] {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+@keyframes banner-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+
+.notice {
+  position: fixed;
+  bottom: calc(96px + env(safe-area-inset-bottom));
+  left: 50%;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: calc(100vw - 32px);
+  padding: 10px 10px 10px 14px;
+  border-radius: var(--radius);
+  background: var(--text);
+  color: var(--bg);
+  box-shadow: var(--shadow-lg);
+  font-size: 0.875rem;
+  transform: translateX(-50%);
+  animation: pill-in 0.2s ease-out;
+}
+
+.notice .icon-btn {
+  width: 28px;
+  height: 28px;
+  color: inherit;
+}
+
+.notice .icon-btn:hover {
+  background: rgb(127 127 127 / 0.25);
+  color: inherit;
+}

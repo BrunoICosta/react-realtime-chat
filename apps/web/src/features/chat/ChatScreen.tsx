@@ -3,8 +3,11 @@ import type { Theme } from '../../core/theme/use-theme'
 import { Icon } from '../../shared/components/Icon'
 import { ThemeToggle } from '../../shared/components/ThemeToggle'
 import { Composer } from './components/Composer'
+import { ConnectionBanner } from './components/ConnectionBanner'
 import { MessageList } from './components/MessageList'
 import { NewMessagesPill } from './components/NewMessagesPill'
+import { Notice } from './components/Notice'
+import { OnlineUsers } from './components/OnlineUsers'
 import { RoomsSidebar } from './components/RoomsSidebar'
 import { TypingIndicator } from './components/TypingIndicator'
 import { useAutoScroll } from './hooks/use-auto-scroll'
@@ -17,17 +20,23 @@ interface ChatScreenProps {
   onToggleTheme: () => void
 }
 
+const WIDE_SCREEN = '(min-width: 1200px)'
+
 export function ChatScreen({ theme, onToggleTheme }: ChatScreenProps) {
-  const { rooms, self, status } = useChatState()
+  const { rooms, self, status, everConnected, notice } = useChatState()
   const { roomId, room } = useActiveRoom()
   const actions = useChatActions()
-  const { sendMessage, leaveRoom, retryMessage } = actions
+  const { sendMessage, leaveRoom, retryMessage, dismissNotice } = actions
   const { onActivity, stopTyping } = useTypingEmitter(
     roomId,
     actions.startTyping,
     actions.stopTyping,
   )
   const [drawerOpen, setDrawerOpen] = useState(false)
+  // The people panel starts open where there is room for a third column.
+  const [usersOpen, setUsersOpen] = useState(
+    () => typeof matchMedia === 'function' && matchMedia(WIDE_SCREEN).matches,
+  )
   const { containerRef, onScroll, unseen, scrollToBottom } = useAutoScroll<HTMLDivElement>({
     roomId,
     messages: room.messages,
@@ -36,24 +45,34 @@ export function ChatScreen({ theme, onToggleTheme }: ChatScreenProps) {
 
   const summary = rooms.find((candidate) => candidate.id === roomId)
   const roomName = summary?.name ?? roomId ?? ''
+  const isOverlayOpen = drawerOpen || usersOpen
 
   useEffect(() => {
-    if (!drawerOpen) return
+    if (!isOverlayOpen) return
     const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') setDrawerOpen(false)
+      if (event.key !== 'Escape') return
+      setDrawerOpen(false)
+      if (!matchMedia(WIDE_SCREEN).matches) setUsersOpen(false)
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [drawerOpen])
+  }, [isOverlayOpen])
+
+  const closeOverlays = () => {
+    setDrawerOpen(false)
+    if (!matchMedia(WIDE_SCREEN).matches) setUsersOpen(false)
+  }
 
   return (
-    <div className="chat" data-drawer={drawerOpen ? 'open' : undefined}>
+    <div
+      className="chat"
+      data-drawer={drawerOpen ? 'open' : undefined}
+      data-users={usersOpen ? 'open' : undefined}
+    >
       <aside className="chat__sidebar" id="rooms-drawer" aria-label="Salas e perfil">
         <RoomsSidebar onNavigate={() => setDrawerOpen(false)} />
       </aside>
-      {drawerOpen && (
-        <div className="chat__scrim" aria-hidden="true" onClick={() => setDrawerOpen(false)} />
-      )}
+      <div className="chat__scrim" aria-hidden="true" onClick={closeOverlays} />
 
       <section className="chat__main" aria-label={roomName ? `Sala #${roomName}` : 'Conversa'}>
         <header className="chat__header">
@@ -83,6 +102,17 @@ export function ChatScreen({ theme, onToggleTheme }: ChatScreenProps) {
           </div>
 
           <div className="chat__actions">
+            <button
+              type="button"
+              className="icon-btn"
+              aria-label="Pessoas online"
+              title="Pessoas online"
+              aria-controls="online-users"
+              aria-expanded={usersOpen}
+              onClick={() => setUsersOpen((open) => !open)}
+            >
+              <Icon name="users" />
+            </button>
             {roomId && room.joined && (
               <button
                 type="button"
@@ -97,6 +127,8 @@ export function ChatScreen({ theme, onToggleTheme }: ChatScreenProps) {
             <ThemeToggle theme={theme} onToggle={onToggleTheme} />
           </div>
         </header>
+
+        <ConnectionBanner status={status} everConnected={everConnected} />
 
         <div className="chat__body-wrap">
           <div
@@ -131,6 +163,18 @@ export function ChatScreen({ theme, onToggleTheme }: ChatScreenProps) {
           onStopTyping={stopTyping}
         />
       </section>
+
+      <aside className="chat__users" id="online-users" aria-label="Pessoas online">
+        <OnlineUsers
+          users={room.users}
+          typing={room.typing}
+          selfId={self.id}
+          roomName={roomName}
+          onClose={() => setUsersOpen(false)}
+        />
+      </aside>
+
+      <Notice notice={notice} onDismiss={dismissNotice} />
     </div>
   )
 }
