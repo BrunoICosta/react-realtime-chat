@@ -41,20 +41,6 @@ const RULES: Rule[] = [
       'via BroadcastChannel. Experimente: "piada", "que horas são?" ou abra outra aba e converse com você mesmo.',
   },
   {
-    test: words(
-      'oi+',
-      'ol[áa]',
-      'e a[íi]',
-      'eai',
-      'opa',
-      'bom dia',
-      'boa tarde',
-      'boa noite',
-      'hey',
-    ),
-    reply: (author) => `Oi, ${author.nickname}! 👋 Que bom te ver por aqui.`,
-  },
-  {
     test: words('horas?', 'hor[áa]rio'),
     reply: (_author, { now }) => `Agora são ${timeFormatter.format(now)} por aqui ⏰`,
   },
@@ -75,6 +61,21 @@ const RULES: Rule[] = [
   {
     test: words('tchau', 'at[ée] mais', 'falou', 'flw'),
     reply: (author) => `Até mais, ${author.nickname}! 👋`,
+  },
+  // Greetings last, so "oi, conta uma piada" gets the joke.
+  {
+    test: words(
+      'oi+',
+      'ol[áa]',
+      'e a[íi]',
+      'eai',
+      'opa',
+      'bom dia',
+      'boa tarde',
+      'boa noite',
+      'hey',
+    ),
+    reply: (author) => `Oi, ${author.nickname}! 👋 Que bom te ver por aqui.`,
   },
 ]
 

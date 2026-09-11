@@ -1,7 +1,13 @@
-/** "Ana Souza" -> "AS", "bruno" -> "BR". */
+/** "Ana Souza" -> "AS", "bruno" -> "BR", "Lia (bot)" -> "LB". Punctuation is ignored. */
 export function initialsOf(nickname: string): string {
-  const parts = nickname.trim().split(/\s+/).filter(Boolean)
-  const first = parts[0]?.[0] ?? '?'
-  const second = parts.length > 1 ? (parts[parts.length - 1]?.[0] ?? '') : (parts[0]?.[1] ?? '')
-  return (first + second).toLocaleUpperCase('pt-BR')
+  const words = nickname
+    .trim()
+    .split(/\s+/)
+    .map((word) => word.replace(/[^\p{L}\p{N}]/gu, ''))
+    .filter(Boolean)
+  const first = words[0]
+  if (!first) return '?'
+  const last = words.length > 1 ? words[words.length - 1] : undefined
+  const initials = last ? `${first[0]}${last[0]}` : first.slice(0, 2)
+  return initials.toLocaleUpperCase('pt-BR')
 }
