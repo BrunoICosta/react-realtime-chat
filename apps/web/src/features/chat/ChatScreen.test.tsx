@@ -79,6 +79,7 @@ describe('<ChatScreen /> with a transport', () => {
 
     const rooms = screen.getByRole('navigation', { name: /Salas/ })
     expect(within(rooms).getByLabelText('2 mensagens não lidas')).toBeInTheDocument()
+    expect(document.title).toBe('(2) #geral · Realtime Chat')
   })
 
   it('warns while reconnecting and re-joins rooms when back', async () => {

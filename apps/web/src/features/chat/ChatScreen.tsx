@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { Theme } from '../../core/theme/use-theme'
 import { Icon } from '../../shared/components/Icon'
 import { ThemeToggle } from '../../shared/components/ThemeToggle'
+import { useDocumentTitle } from '../../shared/hooks/use-document-title'
 import { Composer } from './components/Composer'
 import { ConnectionBanner } from './components/ConnectionBanner'
 import { MessageList } from './components/MessageList'
@@ -23,7 +24,7 @@ interface ChatScreenProps {
 const WIDE_SCREEN = '(min-width: 1200px)'
 
 export function ChatScreen({ theme, onToggleTheme }: ChatScreenProps) {
-  const { rooms, self, status, everConnected, notice } = useChatState()
+  const { rooms, byRoom, self, status, everConnected, notice } = useChatState()
   const { roomId, room } = useActiveRoom()
   const actions = useChatActions()
   const { sendMessage, leaveRoom, retryMessage, dismissNotice } = actions
@@ -46,6 +47,8 @@ export function ChatScreen({ theme, onToggleTheme }: ChatScreenProps) {
   const summary = rooms.find((candidate) => candidate.id === roomId)
   const roomName = summary?.name ?? roomId ?? ''
   const isOverlayOpen = drawerOpen || usersOpen
+  const totalUnread = Object.values(byRoom).reduce((sum, entry) => sum + entry.unread, 0)
+  useDocumentTitle(roomName, totalUnread)
 
   useEffect(() => {
     if (!isOverlayOpen) return
