@@ -15,6 +15,7 @@
   ],
   "scripts": {
     "dev": "concurrently -k -n server,web -c cyan,magenta \"npm run dev -w @chat/server\" \"npm run dev -w @chat/web\"",
+    "dev:demo": "npm run dev:demo -w @chat/web",
     "start": "npm start -w @chat/server",
     "lint": "eslint . && prettier --check .",
     "format": "prettier --write .",
