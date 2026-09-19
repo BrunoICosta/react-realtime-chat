@@ -22,6 +22,7 @@ interface ChatScreenProps {
 }
 
 const WIDE_SCREEN = '(min-width: 1200px)'
+const isWideScreen = () => typeof matchMedia === 'function' && matchMedia(WIDE_SCREEN).matches
 
 export function ChatScreen({ theme, onToggleTheme }: ChatScreenProps) {
   const { rooms, byRoom, self, status, everConnected, notice } = useChatState()
@@ -35,9 +36,7 @@ export function ChatScreen({ theme, onToggleTheme }: ChatScreenProps) {
   )
   const [drawerOpen, setDrawerOpen] = useState(false)
   // The people panel starts open where there is room for a third column.
-  const [usersOpen, setUsersOpen] = useState(
-    () => typeof matchMedia === 'function' && matchMedia(WIDE_SCREEN).matches,
-  )
+  const [usersOpen, setUsersOpen] = useState(isWideScreen)
   const { containerRef, onScroll, unseen, scrollToBottom } = useAutoScroll<HTMLDivElement>({
     roomId,
     messages: room.messages,
@@ -50,12 +49,22 @@ export function ChatScreen({ theme, onToggleTheme }: ChatScreenProps) {
   const totalUnread = Object.values(byRoom).reduce((sum, entry) => sum + entry.unread, 0)
   useDocumentTitle(roomName, totalUnread)
 
+  // Crossing the breakpoint (rotating a tablet, resizing) should not leave the panel
+  // covering the conversation: show it as a column on wide screens, hide it otherwise.
+  useEffect(() => {
+    if (typeof matchMedia !== 'function') return
+    const query = matchMedia(WIDE_SCREEN)
+    const onChange = (event: MediaQueryListEvent) => setUsersOpen(event.matches)
+    query.addEventListener('change', onChange)
+    return () => query.removeEventListener('change', onChange)
+  }, [])
+
   useEffect(() => {
     if (!isOverlayOpen) return
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return
       setDrawerOpen(false)
-      if (!matchMedia(WIDE_SCREEN).matches) setUsersOpen(false)
+      if (!isWideScreen()) setUsersOpen(false)
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
@@ -63,7 +72,7 @@ export function ChatScreen({ theme, onToggleTheme }: ChatScreenProps) {
 
   const closeOverlays = () => {
     setDrawerOpen(false)
-    if (!matchMedia(WIDE_SCREEN).matches) setUsersOpen(false)
+    if (!isWideScreen()) setUsersOpen(false)
   }
 
   return (
