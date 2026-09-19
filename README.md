@@ -9,6 +9,8 @@ um segundo transporte que simula o backend dentro do navegador (abas conversam e
 
 **Demo:** https://brunoicosta.github.io/react-realtime-chat/ (modo demo, sem servidor; abra em duas abas)
 
+![Tela do chat com salas, mensagens agrupadas e pessoas online](docs/screenshot.png)
+
 ## Funcionalidades
 
 - **Login sem cadastro**: apelido + cor do avatar; o servidor emite um **JWT** (HS256, 12h).
