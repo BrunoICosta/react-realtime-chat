@@ -5,6 +5,7 @@ import type { Theme } from '../../core/theme/use-theme'
 import { Avatar } from '../../shared/components/Avatar'
 import { DemoBadge } from '../../shared/components/DemoBadge'
 import { Icon } from '../../shared/components/Icon'
+import { LanguageSwitcher } from '../../shared/components/LanguageSwitcher'
 import { ThemeToggle } from '../../shared/components/ThemeToggle'
 import './LoginScreen.css'
 
@@ -59,6 +60,7 @@ export function LoginScreen({ transport, onLoggedIn, theme, onToggleTheme }: Log
   return (
     <div className="login">
       <div className="login__toolbar">
+        <LanguageSwitcher />
         <ThemeToggle theme={theme} onToggle={onToggleTheme} />
       </div>
 

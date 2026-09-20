@@ -1,6 +1,12 @@
 import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
-import { afterEach } from 'vitest'
+import { afterEach, beforeEach } from 'vitest'
+import { i18n } from '../core/i18n/i18n'
+
+// Tests are written against pt-BR (the default language) unless they switch explicitly.
+beforeEach(async () => {
+  await i18n.changeLanguage('pt-BR')
+})
 
 afterEach(() => {
   cleanup()

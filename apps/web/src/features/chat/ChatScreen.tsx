@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import type { Theme } from '../../core/theme/use-theme'
 import { Icon } from '../../shared/components/Icon'
+import { LanguageSwitcher } from '../../shared/components/LanguageSwitcher'
 import { ThemeToggle } from '../../shared/components/ThemeToggle'
 import { useDocumentTitle } from '../../shared/hooks/use-document-title'
 import { Composer } from './components/Composer'
@@ -136,6 +137,7 @@ export function ChatScreen({ theme, onToggleTheme }: ChatScreenProps) {
                 <Icon name="leave" />
               </button>
             )}
+            <LanguageSwitcher />
             <ThemeToggle theme={theme} onToggle={onToggleTheme} />
           </div>
         </header>
