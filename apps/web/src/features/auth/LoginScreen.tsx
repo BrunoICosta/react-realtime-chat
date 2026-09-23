@@ -1,6 +1,12 @@
-import { AVATAR_COLORS, LIMITS, loginSchema } from '@chat/shared'
+import { AVATAR_COLORS, LIMITS, loginSchema, validationCodeOf } from '@chat/shared'
 import { useId, useState, type FormEvent } from 'react'
-import { errorMessage, type ChatTransport, type Session } from '../../core/transport/chat-transport'
+import { useErrorText } from '../../core/i18n/error-text'
+import {
+  toErrorInfo,
+  type ChatTransport,
+  type ErrorInfo,
+  type Session,
+} from '../../core/transport/chat-transport'
 import type { Theme } from '../../core/theme/use-theme'
 import { Avatar } from '../../shared/components/Avatar'
 import { DemoBadge } from '../../shared/components/DemoBadge'
@@ -31,7 +37,8 @@ const COLOR_NAMES: Record<string, string> = {
 export function LoginScreen({ transport, onLoggedIn, theme, onToggleTheme }: LoginScreenProps) {
   const [nickname, setNickname] = useState('')
   const [color, setColor] = useState<string>(AVATAR_COLORS[0])
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<ErrorInfo | null>(null)
+  const errorText = useErrorText()
   const [submitting, setSubmitting] = useState(false)
   const nicknameId = useId()
   const hintId = useId()
@@ -41,7 +48,7 @@ export function LoginScreen({ transport, onLoggedIn, theme, onToggleTheme }: Log
     event.preventDefault()
     const parsed = loginSchema.safeParse({ nickname, color })
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Apelido inválido')
+      setError({ code: 'VALIDATION', detail: validationCodeOf(parsed.error) })
       return
     }
 
@@ -50,7 +57,7 @@ export function LoginScreen({ transport, onLoggedIn, theme, onToggleTheme }: Log
     try {
       onLoggedIn(await transport.login(parsed.data))
     } catch (err) {
-      setError(errorMessage(err))
+      setError(toErrorInfo(err))
       setSubmitting(false)
     }
   }
@@ -134,7 +141,7 @@ export function LoginScreen({ transport, onLoggedIn, theme, onToggleTheme }: Log
           {error && (
             <p className="alert alert--error" role="alert" id={errorId}>
               <Icon name="alert" size={18} />
-              {error}
+              {errorText(error, 'nickname')}
             </p>
           )}
 

@@ -1,4 +1,6 @@
 import { useMemo } from 'react'
+import { useErrorText } from '../../../core/i18n/error-text'
+import type { ErrorInfo } from '../../../core/transport/chat-transport'
 import { Icon } from '../../../shared/components/Icon'
 import { buildTimeline } from '../lib/group-messages'
 import type { ChatEntry } from '../state/chat-reducer'
@@ -10,7 +12,7 @@ interface MessageListProps {
   messages: ChatEntry[]
   selfId: string
   loading: boolean
-  error: string | null
+  error: ErrorInfo | null
   onRetry: (clientId: string) => void
 }
 
@@ -23,13 +25,14 @@ export function MessageList({
   onRetry,
 }: MessageListProps) {
   const timeline = useMemo(() => buildTimeline(messages), [messages])
+  const errorText = useErrorText()
 
   if (error && messages.length === 0) {
     return (
       <div className="messages__state">
         <p className="alert alert--error" role="alert">
           <Icon name="alert" size={18} />
-          {error}
+          {errorText(error)}
         </p>
       </div>
     )

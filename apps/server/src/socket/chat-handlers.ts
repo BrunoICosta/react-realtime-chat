@@ -27,7 +27,7 @@ export function registerChatHandlers(socket: ChatSocket, deps: ChatHandlerDeps) 
     const result = rateLimit(action)
     if (result.allowed) return false
     ack?.(
-      fail('RATE_LIMITED', 'Calma! Você está enviando rápido demais.', {
+      fail('RATE_LIMITED', {
         retryAfterMs: result.retryAfterMs,
       }),
     )
@@ -47,12 +47,11 @@ export function registerChatHandlers(socket: ChatSocket, deps: ChatHandlerDeps) 
 
     const outcome = store.createRoom(parsed.data.name, user.id)
     if (!outcome.ok) {
-      const messages = {
-        CONFLICT: 'Já existe uma sala com esse nome',
-        LIMIT_REACHED: 'O limite de salas foi atingido',
-        VALIDATION: 'Nome de sala inválido',
-      } as const
-      return ack(fail(outcome.reason, messages[outcome.reason]))
+      return ack(
+        outcome.reason === 'VALIDATION'
+          ? fail('VALIDATION', { detail: 'ROOM_NAME_INVALID_CHARS' })
+          : fail(outcome.reason),
+      )
     }
 
     ack(ok(outcome.room))
@@ -66,12 +65,12 @@ export function registerChatHandlers(socket: ChatSocket, deps: ChatHandlerDeps) 
     if (!parsed.ok) return ack(parsed.result)
 
     const { roomId } = parsed.data
-    if (!store.getRoom(roomId)) return ack(fail('NOT_FOUND', 'Sala não encontrada'))
+    if (!store.getRoom(roomId)) return ack(fail('NOT_FOUND'))
 
     await socket.join(roomId)
     const changed = store.joinRoom(roomId, user, socket.id)
     const room = store.getRoom(roomId)
-    if (!room) return ack(fail('NOT_FOUND', 'Sala não encontrada'))
+    if (!room) return ack(fail('NOT_FOUND'))
 
     ack(
       ok({
@@ -104,7 +103,7 @@ export function registerChatHandlers(socket: ChatSocket, deps: ChatHandlerDeps) 
     if (!parsed.ok) return ack(parsed.result)
 
     const { roomId, text, clientId } = parsed.data
-    if (!socket.rooms.has(roomId)) return ack(fail('NOT_IN_ROOM', 'Entre na sala antes de enviar'))
+    if (!socket.rooms.has(roomId)) return ack(fail('NOT_IN_ROOM'))
 
     const message = store.addMessage({ roomId, author: user, text, clientId })
     typing.stop(roomId, user.id)

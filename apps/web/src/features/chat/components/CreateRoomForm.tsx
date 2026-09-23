@@ -1,6 +1,7 @@
-import { LIMITS, createRoomSchema } from '@chat/shared'
+import { LIMITS, createRoomSchema, validationCodeOf } from '@chat/shared'
 import { useId, useState, type FormEvent, type KeyboardEvent } from 'react'
-import { errorMessage } from '../../../core/transport/chat-transport'
+import { useErrorText } from '../../../core/i18n/error-text'
+import { toErrorInfo, type ErrorInfo } from '../../../core/transport/chat-transport'
 import { Icon } from '../../../shared/components/Icon'
 
 interface CreateRoomFormProps {
@@ -10,7 +11,8 @@ interface CreateRoomFormProps {
 
 export function CreateRoomForm({ onCreate, onClose }: CreateRoomFormProps) {
   const [name, setName] = useState('')
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState<ErrorInfo | null>(null)
+  const errorText = useErrorText()
   const [busy, setBusy] = useState(false)
   const inputId = useId()
   const errorId = useId()
@@ -19,7 +21,7 @@ export function CreateRoomForm({ onCreate, onClose }: CreateRoomFormProps) {
     event.preventDefault()
     const parsed = createRoomSchema.safeParse({ name })
     if (!parsed.success) {
-      setError(parsed.error.issues[0]?.message ?? 'Nome inválido')
+      setError({ code: 'VALIDATION', detail: validationCodeOf(parsed.error) })
       return
     }
     setBusy(true)
@@ -28,7 +30,7 @@ export function CreateRoomForm({ onCreate, onClose }: CreateRoomFormProps) {
       await onCreate(parsed.data.name)
       onClose()
     } catch (err) {
-      setError(errorMessage(err))
+      setError(toErrorInfo(err))
       setBusy(false)
     }
   }
@@ -69,7 +71,7 @@ export function CreateRoomForm({ onCreate, onClose }: CreateRoomFormProps) {
       </div>
       {error && (
         <p className="create-room__error" id={errorId} role="alert">
-          {error}
+          {errorText(error, 'room')}
         </p>
       )}
     </form>

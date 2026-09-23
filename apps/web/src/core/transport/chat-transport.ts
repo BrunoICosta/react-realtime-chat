@@ -1,6 +1,7 @@
 import type {
   ChatMessage,
   ErrorCode,
+  ValidationCode,
   JoinRoomResult,
   LoginInput,
   LoginResponse,
@@ -45,20 +46,53 @@ export interface ChatTransport {
   stopTyping(roomId: string): void
 }
 
-export type TransportErrorCode = ErrorCode | 'NETWORK' | 'TIMEOUT' | 'OFFLINE'
+export const TRANSPORT_ERROR_CODES = [
+  'VALIDATION',
+  'RATE_LIMITED',
+  'NOT_FOUND',
+  'NOT_IN_ROOM',
+  'CONFLICT',
+  'LIMIT_REACHED',
+  'NETWORK',
+  'TIMEOUT',
+  'OFFLINE',
+  'UNKNOWN',
+] as const
+
+export type TransportErrorCode = (typeof TRANSPORT_ERROR_CODES)[number]
+
+/** Compile-time guard: every server error code must be a transport error code too. */
+export const SERVER_CODES_ARE_COVERED: ErrorCode extends TransportErrorCode ? true : never = true
+
+/** What the UI needs to describe a failure. It is translated at render time, never stored as text. */
+export interface ErrorInfo {
+  code: TransportErrorCode
+  detail?: ValidationCode | undefined
+}
 
 export class TransportError extends Error {
   readonly code: TransportErrorCode
+  readonly detail: ValidationCode | undefined
   readonly retryAfterMs: number | undefined
 
-  constructor(code: TransportErrorCode, message: string, retryAfterMs?: number) {
-    super(message)
+  constructor(code: TransportErrorCode, detail?: ValidationCode, retryAfterMs?: number) {
+    // The message is for logs only; users see a translated text built from the code.
+    super(detail ? `${code}: ${detail}` : code)
     this.name = 'TransportError'
     this.code = code
+    this.detail = detail
     this.retryAfterMs = retryAfterMs
   }
 }
 
-export function errorMessage(error: unknown, fallback = 'Algo deu errado. Tente novamente.') {
-  return error instanceof Error && error.message ? error.message : fallback
+/** Accepts unknown codes from the wire (e.g. HTTP 500 "INTERNAL") and maps them to UNKNOWN. */
+export function toTransportErrorCode(code: unknown): TransportErrorCode {
+  return TRANSPORT_ERROR_CODES.includes(code as TransportErrorCode)
+    ? (code as TransportErrorCode)
+    : 'UNKNOWN'
+}
+
+export function toErrorInfo(error: unknown): ErrorInfo {
+  if (error instanceof TransportError) return { code: error.code, detail: error.detail }
+  return { code: 'UNKNOWN' }
 }

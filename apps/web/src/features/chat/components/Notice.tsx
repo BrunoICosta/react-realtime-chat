@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { useErrorText } from '../../../core/i18n/error-text'
 import { Icon } from '../../../shared/components/Icon'
 import type { ChatNotice } from '../state/chat-context'
 
@@ -18,11 +19,13 @@ export function Notice({
     return () => clearTimeout(timer)
   }, [notice, onDismiss])
 
+  const errorText = useErrorText()
+
   if (!notice) return null
   return (
     <div className="notice" role="alert">
       <Icon name="alert" size={18} />
-      <span>{notice.text}</span>
+      <span>{errorText(notice.error)}</span>
       <button type="button" className="icon-btn" onClick={onDismiss} aria-label="Fechar aviso">
         <Icon name="close" size={16} />
       </button>

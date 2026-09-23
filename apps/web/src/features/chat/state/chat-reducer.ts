@@ -6,7 +6,7 @@ import type {
   RoomSummary,
   TypingPayload,
 } from '@chat/shared'
-import type { ConnectionStatus } from '../../../core/transport/chat-transport'
+import type { ConnectionStatus, ErrorInfo } from '../../../core/transport/chat-transport'
 
 export type DeliveryStatus = 'sent' | 'pending' | 'failed'
 
@@ -21,7 +21,7 @@ export interface RoomState {
   unread: number
   joined: boolean
   loading: boolean
-  error: string | null
+  error: ErrorInfo | null
 }
 
 export interface ChatState {
@@ -40,7 +40,7 @@ export type ChatAction =
   | { type: 'activate'; roomId: string }
   | { type: 'joinStarted'; roomId: string }
   | { type: 'joined'; result: JoinRoomResult }
-  | { type: 'joinFailed'; roomId: string; error: string }
+  | { type: 'joinFailed'; roomId: string; error: ErrorInfo }
   | { type: 'left'; roomId: string }
   | { type: 'received'; message: ChatMessage }
   | { type: 'pending'; message: ChatMessage }

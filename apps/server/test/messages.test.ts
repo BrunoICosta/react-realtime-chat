@@ -52,14 +52,14 @@ describe('messages', () => {
   })
 
   it.each([
-    ['empty', '   '],
-    ['too long', 'a'.repeat(LIMITS.messageMax + 1)],
-  ])('validates %s messages', async (_label, text) => {
+    ['empty', '   ', 'MESSAGE_EMPTY'],
+    ['too long', 'a'.repeat(LIMITS.messageMax + 1), 'MESSAGE_TOO_LONG'],
+  ])('validates %s messages', async (_label, text, detail) => {
     const { connectAs } = await startServer()
     const { client } = await connectAs('Ana')
     await joinRoom(client, 'geral')
     const ack = await client.emitWithAck('message:send', { roomId: 'geral', text })
-    expect(ack).toMatchObject({ ok: false, error: { code: 'VALIDATION' } })
+    expect(ack).toEqual({ ok: false, error: { code: 'VALIDATION', detail } })
   })
 
   it('ignores payloads of the wrong shape without crashing', async () => {
@@ -68,7 +68,7 @@ describe('messages', () => {
     await joinRoom(client, 'geral')
 
     const ack = await client.emitWithAck('message:send', 42 as never)
-    expect(ack).toMatchObject({ ok: false, error: { code: 'VALIDATION' } })
+    expect(ack).toEqual({ ok: false, error: { code: 'VALIDATION', detail: 'INVALID_PAYLOAD' } })
 
     // Missing ack callback: the server must simply ignore it.
     ;(client.emit as (event: string, payload: unknown) => void)('message:send', {

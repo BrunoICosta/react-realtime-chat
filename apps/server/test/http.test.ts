@@ -35,17 +35,16 @@ describe('HTTP API', () => {
   })
 
   it.each([
-    [{ nickname: 'a' }, 'ao menos 2'],
-    [{ nickname: 'x'.repeat(30) }, 'no máximo 24'],
-    [{ nickname: '<script>' }, 'Use apenas'],
-    [{ nickname: 'Caio', color: 'red' }, 'Cor inválida'],
-    [{}, ''],
-  ])('rejects invalid payload %j', async (payload, message) => {
+    [{ nickname: 'a' }, 'NICKNAME_TOO_SHORT'],
+    [{ nickname: 'x'.repeat(30) }, 'NICKNAME_TOO_LONG'],
+    [{ nickname: '<script>' }, 'NICKNAME_INVALID_CHARS'],
+    [{ nickname: 'Caio', color: 'red' }, 'COLOR_INVALID'],
+    [{}, 'INVALID_PAYLOAD'],
+  ])('rejects invalid payload %j with a code, not a text', async (payload, detail) => {
     const { url } = await startServer()
     const { status, body } = await postLogin(url, payload)
     expect(status).toBe(400)
-    expect(body.error).toMatchObject({ code: 'VALIDATION' })
-    expect((body.error as { message: string }).message).toContain(message)
+    expect(body.error).toEqual({ code: 'VALIDATION', detail })
   })
 
   it('rejects a nickname that is online right now, case-insensitively', async () => {
@@ -54,7 +53,7 @@ describe('HTTP API', () => {
 
     const taken = await postLogin(url, { nickname: 'duda' })
     expect(taken.status).toBe(409)
-    expect(taken.body.error).toMatchObject({ code: 'CONFLICT' })
+    expect(taken.body.error).toEqual({ code: 'CONFLICT' })
 
     client.disconnect()
     await new Promise((resolve) => setTimeout(resolve, 50))
@@ -66,6 +65,6 @@ describe('HTTP API', () => {
     const { url } = await startServer()
     const response = await fetch(`${url}/api/nope`)
     expect(response.status).toBe(404)
-    expect(await response.json()).toMatchObject({ error: { code: 'NOT_FOUND' } })
+    expect(await response.json()).toEqual({ error: { code: 'NOT_FOUND' } })
   })
 })

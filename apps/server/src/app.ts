@@ -23,7 +23,7 @@ export function createApp({ config, tokens, isNicknameTaken }: AppDeps) {
   app.use('/api', createLoginRouter({ tokens, isNicknameTaken }))
 
   app.use((_req, res) => {
-    res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Rota não encontrada' } })
+    res.status(404).json({ error: { code: 'NOT_FOUND' } })
   })
 
   const errorHandler: ErrorRequestHandler = (err: unknown, _req, res, _next) => {
@@ -33,7 +33,7 @@ export function createApp({ config, tokens, isNicknameTaken }: AppDeps) {
         : 500
     if (status >= 500) console.error(err)
     res.status(status).json({
-      error: { code: status >= 500 ? 'INTERNAL' : 'BAD_REQUEST', message: 'Requisição inválida' },
+      error: { code: status >= 500 ? 'INTERNAL' : 'BAD_REQUEST' },
     })
   }
   app.use(errorHandler)

@@ -1,12 +1,14 @@
 import type { ChatMessage, JoinRoomResult, PublicUser, Room, RoomSummary } from './models.js'
-import type { CreateRoomInput, RoomRef, SendMessageInput } from './schemas.js'
+import type { CreateRoomInput, RoomRef, SendMessageInput, ValidationCode } from './schemas.js'
 
 export type ErrorCode =
   'VALIDATION' | 'RATE_LIMITED' | 'NOT_FOUND' | 'NOT_IN_ROOM' | 'CONFLICT' | 'LIMIT_REACHED'
 
+/** Errors carry codes only; clients decide how (and in which language) to show them. */
 export interface AckError {
   code: ErrorCode
-  message: string
+  /** Which rule failed, when `code` is `VALIDATION`. */
+  detail?: ValidationCode
   /** Present when `code` is `RATE_LIMITED`. */
   retryAfterMs?: number
 }

@@ -40,9 +40,7 @@ describe('<LoginScreen />', () => {
   })
 
   it('shows server errors such as a nickname already in use', async () => {
-    const login = vi
-      .fn()
-      .mockRejectedValue(new TransportError('CONFLICT', 'Esse apelido já está em uso agora'))
+    const login = vi.fn().mockRejectedValue(new TransportError('CONFLICT'))
     const { user } = setup(login)
 
     await user.type(screen.getByLabelText('Seu apelido'), 'Bia{Enter}')

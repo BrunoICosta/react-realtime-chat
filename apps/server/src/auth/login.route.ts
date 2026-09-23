@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
 import { Router } from 'express'
-import { AVATAR_COLORS, loginSchema, type LoginResponse } from '@chat/shared'
+import { AVATAR_COLORS, loginSchema, validationCodeOf, type LoginResponse } from '@chat/shared'
 import type { TokenService } from './token.js'
 
 export interface LoginRouteDeps {
@@ -18,7 +18,7 @@ export function createLoginRouter({ tokens, isNicknameTaken }: LoginRouteDeps) {
       res.status(400).json({
         error: {
           code: 'VALIDATION',
-          message: parsed.error.issues[0]?.message ?? 'Dados inválidos',
+          detail: validationCodeOf(parsed.error),
         },
       })
       return
@@ -27,7 +27,7 @@ export function createLoginRouter({ tokens, isNicknameTaken }: LoginRouteDeps) {
     const { nickname, color } = parsed.data
     if (isNicknameTaken(nickname)) {
       res.status(409).json({
-        error: { code: 'CONFLICT', message: 'Esse apelido já está em uso agora' },
+        error: { code: 'CONFLICT' },
       })
       return
     }

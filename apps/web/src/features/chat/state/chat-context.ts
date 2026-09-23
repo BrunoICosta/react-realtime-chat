@@ -1,10 +1,10 @@
 import { createContext } from 'react'
-import type { TransportMode } from '../../../core/transport/chat-transport'
+import type { ErrorInfo, TransportMode } from '../../../core/transport/chat-transport'
 import type { ChatState } from './chat-reducer'
 
 export interface ChatNotice {
   id: number
-  text: string
+  error: ErrorInfo
 }
 
 export interface ChatContextState extends ChatState {

@@ -9,8 +9,9 @@ import {
 } from 'react'
 import {
   TransportError,
-  errorMessage,
+  toErrorInfo,
   type ChatTransport,
+  type ErrorInfo,
   type Session,
 } from '../../../core/transport/chat-transport'
 import {
@@ -47,8 +48,8 @@ export function ChatProvider({ transport, session, onLogout, children }: ChatPro
     onLogoutRef.current = onLogout
   })
 
-  const notify = useCallback((text: string) => {
-    setNotice({ id: Date.now(), text })
+  const notify = useCallback((error: ErrorInfo) => {
+    setNotice({ id: Date.now(), error })
   }, [])
 
   const join = useCallback(
@@ -58,7 +59,7 @@ export function ChatProvider({ transport, session, onLogout, children }: ChatPro
         try {
           dispatch({ type: 'joined', result: await transport.joinRoom(id) })
         } catch (error) {
-          dispatch({ type: 'joinFailed', roomId: id, error: errorMessage(error) })
+          dispatch({ type: 'joinFailed', roomId: id, error: toErrorInfo(error) })
           // The remembered room no longer exists (server restarted): fall back to #geral.
           const gone = error instanceof TransportError && error.code === 'NOT_FOUND'
           if (gone && id !== DEFAULT_ROOM && stateRef.current.activeRoomId === id) {
@@ -94,7 +95,7 @@ export function ChatProvider({ transport, session, onLogout, children }: ChatPro
       } catch (error) {
         dispatch({ type: 'failed', clientId })
         if (error instanceof TransportError && error.code === 'RATE_LIMITED') {
-          notify(error.message)
+          notify(toErrorInfo(error))
         }
       }
     },

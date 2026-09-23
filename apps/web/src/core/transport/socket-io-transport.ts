@@ -4,21 +4,22 @@ import {
   type ClientToServerEvents,
   type LoginInput,
   type ServerToClientEvents,
+  type ValidationCode,
 } from '@chat/shared'
 import { io, type Socket } from 'socket.io-client'
 import { Emitter } from '../lib/emitter'
 import {
   TransportError,
+  toTransportErrorCode,
   type ChatTransport,
   type Session,
-  type TransportErrorCode,
   type TransportEvents,
 } from './chat-transport'
 
 type ClientSocket = Socket<ServerToClientEvents, ClientToServerEvents>
 
 interface ErrorBody {
-  error?: { code?: TransportErrorCode; message?: string }
+  error?: { code?: string; detail?: ValidationCode }
 }
 
 export class SocketIoTransport implements ChatTransport {
@@ -42,19 +43,13 @@ export class SocketIoTransport implements ChatTransport {
         body: JSON.stringify(input),
       })
     } catch {
-      throw new TransportError(
-        'NETWORK',
-        'Não foi possível falar com o servidor. Ele está rodando?',
-      )
+      throw new TransportError('NETWORK')
     }
 
     const body: unknown = await response.json().catch(() => null)
     if (!response.ok) {
       const error = (body as ErrorBody | null)?.error
-      throw new TransportError(
-        error?.code ?? 'NETWORK',
-        error?.message ?? `O servidor respondeu com erro ${response.status}`,
-      )
+      throw new TransportError(toTransportErrorCode(error?.code), error?.detail)
     }
     return body as Session
   }
@@ -132,18 +127,22 @@ export class SocketIoTransport implements ChatTransport {
   private async request<T>(send: (socket: ClientSocket) => Promise<AckResult<T>>): Promise<T> {
     const socket = this.socket
     if (!socket?.connected) {
-      throw new TransportError('OFFLINE', 'Sem conexão com o servidor no momento')
+      throw new TransportError('OFFLINE')
     }
 
     let result: AckResult<T>
     try {
       result = await send(socket.timeout(this.ackTimeoutMs) as ClientSocket)
     } catch {
-      throw new TransportError('TIMEOUT', 'O servidor demorou demais para responder')
+      throw new TransportError('TIMEOUT')
     }
 
     if (!result.ok) {
-      throw new TransportError(result.error.code, result.error.message, result.error.retryAfterMs)
+      throw new TransportError(
+        toTransportErrorCode(result.error.code),
+        result.error.detail,
+        result.error.retryAfterMs,
+      )
     }
     return result.data
   }

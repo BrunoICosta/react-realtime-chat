@@ -1,4 +1,10 @@
-import type { Ack, AckError, AckResult, ErrorCode } from '@chat/shared'
+import {
+  validationCodeOf,
+  type Ack,
+  type AckError,
+  type AckResult,
+  type ErrorCode,
+} from '@chat/shared'
 import type { z } from 'zod'
 
 /**
@@ -13,12 +19,9 @@ export function ok<T>(data: T): AckResult<T> {
   return { ok: true, data }
 }
 
-export function fail(
-  code: ErrorCode,
-  message: string,
-  extra?: Partial<AckError>,
-): AckResult<never> {
-  return { ok: false, error: { code, message, ...extra } }
+/** Errors are codes only: the client translates them into the user's language. */
+export function fail(code: ErrorCode, extra?: Omit<AckError, 'code'>): AckResult<never> {
+  return { ok: false, error: { code, ...extra } }
 }
 
 export type Parsed<T> = { ok: true; data: T } | { ok: false; result: AckResult<never> }
@@ -30,8 +33,5 @@ export function parsePayload<S extends z.ZodType>(
 ): Parsed<z.output<S>> {
   const parsed = schema.safeParse(payload)
   if (parsed.success) return { ok: true, data: parsed.data }
-  return {
-    ok: false,
-    result: fail('VALIDATION', parsed.error.issues[0]?.message ?? 'Dados inválidos'),
-  }
+  return { ok: false, result: fail('VALIDATION', { detail: validationCodeOf(parsed.error) }) }
 }

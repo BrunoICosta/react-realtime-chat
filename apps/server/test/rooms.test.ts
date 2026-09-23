@@ -99,9 +99,9 @@ describe('rooms and presence', () => {
       ok: false,
       error: { code: 'CONFLICT' },
     })
-    expect(await client.emitWithAck('room:create', { name: 'x' })).toMatchObject({
+    expect(await client.emitWithAck('room:create', { name: 'x' })).toEqual({
       ok: false,
-      error: { code: 'VALIDATION' },
+      error: { code: 'VALIDATION', detail: 'ROOM_NAME_TOO_SHORT' },
     })
   })
 })

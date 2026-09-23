@@ -5,6 +5,7 @@ import {
   roomIdSchema,
   sendMessageSchema,
   slugifyRoomName,
+  validationCodeOf,
   type ChatMessage,
   type JoinRoomResult,
   type LoginInput,
@@ -121,7 +122,7 @@ export class BroadcastChannelTransport implements ChatTransport {
     await this.delay()
     const { nickname, color } = validate(loginSchema, input)
     if (isReservedNickname(nickname)) {
-      throw new TransportError('CONFLICT', 'Esse apelido já está em uso agora')
+      throw new TransportError('CONFLICT')
     }
     const user: PublicUser = { id: crypto.randomUUID(), nickname, color: color ?? '#6366f1' }
     return { token: `demo.${user.id}`, user }
@@ -185,9 +186,8 @@ export class BroadcastChannelTransport implements ChatTransport {
     const self = this.requireSession()
     const input = validate(createRoomSchema, { name })
     const id = slugifyRoomName(input.name)
-    if (!id) throw new TransportError('VALIDATION', 'Nome de sala inválido')
-    if (this.store.getRoom(id))
-      throw new TransportError('CONFLICT', 'Já existe uma sala com esse nome')
+    if (!id) throw new TransportError('VALIDATION', 'ROOM_NAME_INVALID_CHARS')
+    if (this.store.getRoom(id)) throw new TransportError('CONFLICT')
 
     const room: Room = { id, name: input.name, createdAt: Date.now(), createdBy: self.id }
     this.store.addRoom(room)
@@ -201,7 +201,7 @@ export class BroadcastChannelTransport implements ChatTransport {
     this.requireSession()
     const id = validate(roomIdSchema, roomId)
     const room = this.store.getRoom(id)
-    if (!room) throw new TransportError('NOT_FOUND', 'Sala não encontrada')
+    if (!room) throw new TransportError('NOT_FOUND')
 
     const isNew = !this.joined.has(id)
     this.joined.add(id)
@@ -234,7 +234,7 @@ export class BroadcastChannelTransport implements ChatTransport {
     const author = this.requireSession()
     const { roomId, text, clientId } = validate(sendMessageSchema, input)
     if (!this.joined.has(roomId)) {
-      throw new TransportError('NOT_IN_ROOM', 'Entre na sala antes de enviar')
+      throw new TransportError('NOT_IN_ROOM')
     }
 
     const message: ChatMessage = {
@@ -447,7 +447,7 @@ export class BroadcastChannelTransport implements ChatTransport {
   }
 
   private requireSession(): PublicUser {
-    if (!this.session) throw new TransportError('OFFLINE', 'Você não está conectado')
+    if (!this.session) throw new TransportError('OFFLINE')
     return this.session.user
   }
 
@@ -475,7 +475,7 @@ export class BroadcastChannelTransport implements ChatTransport {
 function validate<S extends z.ZodType>(schema: S, value: unknown): z.output<S> {
   const parsed = schema.safeParse(value)
   if (!parsed.success) {
-    throw new TransportError('VALIDATION', parsed.error.issues[0]?.message ?? 'Dados inválidos')
+    throw new TransportError('VALIDATION', validationCodeOf(parsed.error))
   }
   return parsed.data
 }
