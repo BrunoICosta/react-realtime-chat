@@ -1,4 +1,5 @@
 import type { PublicUser } from '@chat/shared'
+import { useTranslation } from 'react-i18next'
 import { Avatar } from '../../../shared/components/Avatar'
 import { Icon } from '../../../shared/components/Icon'
 import './OnlineUsers.css'
@@ -12,6 +13,7 @@ interface OnlineUsersProps {
 }
 
 export function OnlineUsers({ users, typing, selfId, roomName, onClose }: OnlineUsersProps) {
+  const { t } = useTranslation('chat')
   const typingIds = new Set(typing.map((user) => user.id))
   // You first, then everyone else alphabetically (the server already sorts them).
   const sorted = [...users].sort((a, b) => Number(b.id === selfId) - Number(a.id === selfId))
@@ -20,12 +22,13 @@ export function OnlineUsers({ users, typing, selfId, roomName, onClose }: Online
     <div className="online">
       <div className="online__header">
         <h2 className="online__title" id="online-heading">
-          Online em #{roomName} <span className="online__count">{users.length}</span>
+          {t('online.title', { room: roomName })}{' '}
+          <span className="online__count">{users.length}</span>
         </h2>
         <button
           type="button"
           className="icon-btn icon-btn--sm online__close"
-          aria-label="Fechar lista de pessoas"
+          aria-label={t('online.close')}
           onClick={onClose}
         >
           <Icon name="close" size={18} />
@@ -33,17 +36,17 @@ export function OnlineUsers({ users, typing, selfId, roomName, onClose }: Online
       </div>
 
       {sorted.length === 0 ? (
-        <p className="online__empty">Ninguém por aqui ainda.</p>
+        <p className="online__empty">{t('online.empty')}</p>
       ) : (
         <ul className="online__list" aria-labelledby="online-heading">
           {sorted.map((user) => (
             <li key={user.id} className="online__item">
               <Avatar user={user} size="sm" online />
               <span className="online__name">{user.nickname}</span>
-              {user.id === selfId && <span className="online__tag">você</span>}
+              {user.id === selfId && <span className="online__tag">{t('online.you')}</span>}
               {typingIds.has(user.id) && (
-                <span className="online__typing" title="digitando">
-                  <span className="visually-hidden">digitando</span>
+                <span className="online__typing" title={t('online.typing')}>
+                  <span className="visually-hidden">{t('online.typing')}</span>
                   <span aria-hidden="true">✍️</span>
                 </span>
               )}

@@ -1,4 +1,5 @@
 import { LIMITS, createRoomSchema, validationCodeOf } from '@chat/shared'
+import { useTranslation } from 'react-i18next'
 import { useId, useState, type FormEvent, type KeyboardEvent } from 'react'
 import { useErrorText } from '../../../core/i18n/error-text'
 import { toErrorInfo, type ErrorInfo } from '../../../core/transport/chat-transport'
@@ -10,6 +11,7 @@ interface CreateRoomFormProps {
 }
 
 export function CreateRoomForm({ onCreate, onClose }: CreateRoomFormProps) {
+  const { t } = useTranslation('chat')
   const [name, setName] = useState('')
   const [error, setError] = useState<ErrorInfo | null>(null)
   const errorText = useErrorText()
@@ -42,7 +44,7 @@ export function CreateRoomForm({ onCreate, onClose }: CreateRoomFormProps) {
   return (
     <form className="create-room" onSubmit={handleSubmit} onKeyDown={handleKeyDown} noValidate>
       <label htmlFor={inputId} className="visually-hidden">
-        Nome da nova sala
+        {t('createRoom.label')}
       </label>
       <div className="create-room__row">
         <span className="create-room__hash" aria-hidden="true">
@@ -53,7 +55,7 @@ export function CreateRoomForm({ onCreate, onClose }: CreateRoomFormProps) {
           className="input create-room__input"
           value={name}
           onChange={(event) => setName(event.target.value)}
-          placeholder="nome-da-sala"
+          placeholder={t('createRoom.placeholder')}
           maxLength={LIMITS.roomNameMax}
           autoFocus
           aria-invalid={error ? true : undefined}
@@ -63,7 +65,7 @@ export function CreateRoomForm({ onCreate, onClose }: CreateRoomFormProps) {
         <button
           type="submit"
           className="icon-btn create-room__submit"
-          aria-label="Criar sala"
+          aria-label={t('createRoom.submit')}
           disabled={busy}
         >
           {busy ? <span className="spinner" aria-hidden="true" /> : <Icon name="check" />}

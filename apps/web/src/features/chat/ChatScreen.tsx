@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { Theme } from '../../core/theme/use-theme'
 import { Icon } from '../../shared/components/Icon'
 import { LanguageSwitcher } from '../../shared/components/LanguageSwitcher'
@@ -26,6 +27,7 @@ const WIDE_SCREEN = '(min-width: 1200px)'
 const isWideScreen = () => typeof matchMedia === 'function' && matchMedia(WIDE_SCREEN).matches
 
 export function ChatScreen({ theme, onToggleTheme }: ChatScreenProps) {
+  const { t } = useTranslation('chat')
   const { rooms, byRoom, self, status, everConnected, notice } = useChatState()
   const { roomId, room } = useActiveRoom()
   const actions = useChatActions()
@@ -82,17 +84,22 @@ export function ChatScreen({ theme, onToggleTheme }: ChatScreenProps) {
       data-drawer={drawerOpen ? 'open' : undefined}
       data-users={usersOpen ? 'open' : undefined}
     >
-      <aside className="chat__sidebar" id="rooms-drawer" aria-label="Salas e perfil">
+      <aside className="chat__sidebar" id="rooms-drawer" aria-label={t('sidebar.label')}>
         <RoomsSidebar onNavigate={() => setDrawerOpen(false)} />
       </aside>
       <div className="chat__scrim" aria-hidden="true" onClick={closeOverlays} />
 
-      <section className="chat__main" aria-label={roomName ? `Sala #${roomName}` : 'Conversa'}>
+      <section
+        className="chat__main"
+        aria-label={
+          roomName ? t('header.section', { room: roomName }) : t('header.sectionFallback')
+        }
+      >
         <header className="chat__header">
           <button
             type="button"
             className="icon-btn chat__menu"
-            aria-label="Abrir salas"
+            aria-label={t('header.openRooms')}
             aria-controls="rooms-drawer"
             aria-expanded={drawerOpen}
             onClick={() => setDrawerOpen(true)}
@@ -103,13 +110,11 @@ export function ChatScreen({ theme, onToggleTheme }: ChatScreenProps) {
           <div className="chat__room">
             <h1 className="chat__room-name">
               <Icon name="hash" size={18} />
-              <span>{roomName || 'Escolha uma sala'}</span>
+              <span>{roomName || t('header.chooseRoom')}</span>
             </h1>
             {room.joined && (
               <p className="chat__room-meta">
-                {room.users.length === 1
-                  ? '1 pessoa online'
-                  : `${room.users.length} pessoas online`}
+                {t('header.peopleOnline', { count: room.users.length })}
               </p>
             )}
           </div>
@@ -118,8 +123,8 @@ export function ChatScreen({ theme, onToggleTheme }: ChatScreenProps) {
             <button
               type="button"
               className="icon-btn"
-              aria-label="Pessoas online"
-              title="Pessoas online"
+              aria-label={t('header.people')}
+              title={t('header.people')}
               aria-controls="online-users"
               aria-expanded={usersOpen}
               onClick={() => setUsersOpen((open) => !open)}
@@ -131,8 +136,8 @@ export function ChatScreen({ theme, onToggleTheme }: ChatScreenProps) {
                 type="button"
                 className="icon-btn"
                 onClick={() => leaveRoom(roomId)}
-                aria-label={`Sair da sala #${roomName}`}
-                title="Sair da sala"
+                aria-label={t('header.leave', { room: roomName })}
+                title={t('header.leaveTitle')}
               >
                 <Icon name="leave" />
               </button>
@@ -150,7 +155,9 @@ export function ChatScreen({ theme, onToggleTheme }: ChatScreenProps) {
             className="chat__body"
             onScroll={onScroll}
             role="log"
-            aria-label={roomName ? `Mensagens de #${roomName}` : 'Mensagens'}
+            aria-label={
+              roomName ? t('messages.log', { room: roomName }) : t('messages.logFallback')
+            }
             aria-relevant="additions"
             tabIndex={0}
           >
@@ -171,14 +178,14 @@ export function ChatScreen({ theme, onToggleTheme }: ChatScreenProps) {
           key={roomId ?? 'none'}
           roomName={roomName}
           disabled={status !== 'connected' || !room.joined}
-          disabledReason={status === 'connected' ? 'Entrando na sala…' : 'Sem conexão…'}
+          disabledReason={status === 'connected' ? t('composer.joining') : t('composer.offline')}
           onSend={sendMessage}
           onTyping={onActivity}
           onStopTyping={stopTyping}
         />
       </section>
 
-      <aside className="chat__users" id="online-users" aria-label="Pessoas online">
+      <aside className="chat__users" id="online-users" aria-label={t('header.people')}>
         <OnlineUsers
           users={room.users}
           typing={room.typing}

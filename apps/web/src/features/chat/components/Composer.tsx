@@ -1,4 +1,5 @@
 import { LIMITS } from '@chat/shared'
+import { useTranslation } from 'react-i18next'
 import { useCallback, useId, useLayoutEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { Icon } from '../../../shared/components/Icon'
 import { EmojiPicker } from './EmojiPicker'
@@ -27,6 +28,7 @@ export function Composer({
   onTyping,
   onStopTyping,
 }: ComposerProps) {
+  const { t } = useTranslation('chat')
   const [text, setText] = useState('')
   const [pickerOpen, setPickerOpen] = useState(false)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -96,7 +98,7 @@ export function Composer({
         <button
           type="button"
           className="icon-btn composer__emoji"
-          aria-label="Inserir emoji"
+          aria-label={t('composer.emoji')}
           aria-haspopup="dialog"
           aria-expanded={pickerOpen}
           aria-controls={pickerOpen ? pickerId : undefined}
@@ -108,7 +110,7 @@ export function Composer({
         </button>
 
         <label className="visually-hidden" htmlFor={`${pickerId}-input`}>
-          Mensagem para #{roomName}
+          {t('composer.label', { room: roomName })}
         </label>
         <textarea
           id={`${pickerId}-input`}
@@ -116,7 +118,11 @@ export function Composer({
           className="composer__input"
           rows={1}
           value={text}
-          placeholder={disabled ? (disabledReason ?? 'Conectando…') : `Mensagem para #${roomName}`}
+          placeholder={
+            disabled
+              ? (disabledReason ?? t('composer.connecting'))
+              : t('composer.label', { room: roomName })
+          }
           onChange={(event) => {
             setText(event.target.value)
             if (event.target.value.trim()) onTyping?.()
@@ -132,7 +138,7 @@ export function Composer({
         <button
           type="submit"
           className="composer__send"
-          aria-label="Enviar mensagem"
+          aria-label={t('composer.send')}
           disabled={!canSend}
         >
           <Icon name="send" size={18} />
@@ -141,7 +147,8 @@ export function Composer({
 
       <div className="composer__hints">
         <span className="composer__shortcut">
-          <kbd>Enter</kbd> envia · <kbd>Shift</kbd> + <kbd>Enter</kbd> quebra a linha
+          <kbd>Enter</kbd> {t('composer.sendHint')} · <kbd>Shift</kbd> + <kbd>Enter</kbd>{' '}
+          {t('composer.newlineHint')}
         </span>
         {remaining < 100 && (
           <span
@@ -151,8 +158,8 @@ export function Composer({
             aria-live="polite"
           >
             {remaining < 0
-              ? `${-remaining} caracteres acima do limite`
-              : `${remaining} caracteres restantes`}
+              ? t('composer.over', { count: -remaining })
+              : t('composer.remaining', { count: remaining })}
           </span>
         )}
       </div>

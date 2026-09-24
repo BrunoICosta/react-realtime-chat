@@ -27,28 +27,3 @@ export function isReservedNickname(nickname: string): boolean {
       user.nickname.toLocaleLowerCase('pt-BR').startsWith(`${wanted} `),
   )
 }
-
-/** Small talk the simulated users post from time to time, per room. */
-export const AMBIENT_LINES: Record<string, ReadonlyArray<{ user: PublicUser; text: string }>> = {
-  geral: [
-    { user: MARINA, text: 'Alguém mais tomando o terceiro café do dia? ☕' },
-    { user: MARINA, text: 'Dica: abre esta página em outra aba e conversa com você mesmo 😄' },
-    { user: MARINA, text: 'Sextou? Ainda não, mas a gente finge 🎉' },
-  ],
-  dev: [
-    { user: DIEGO, text: 'Subi um PR com os testes do rate limiter, se alguém puder revisar 🙏' },
-    {
-      user: MARINA,
-      text: 'TIL: BroadcastChannel funciona entre abas da mesma origem, sem servidor.',
-    },
-    { user: DIEGO, text: 'Socket.io com acks tipados é outro nível de DX.' },
-    {
-      user: MARINA,
-      text: 'Quem nunca esqueceu de limpar um setTimeout no useEffect que atire a primeira pedra.',
-    },
-  ],
-  random: [
-    { user: DIEGO, text: 'Recomendação de podcast pra hoje: qualquer um sobre café 😅' },
-    { user: DIEGO, text: 'Alguém viu o jogo ontem? ⚽' },
-  ],
-}

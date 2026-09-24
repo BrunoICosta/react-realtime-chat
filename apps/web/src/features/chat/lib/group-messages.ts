@@ -1,6 +1,6 @@
 import type { PublicUser } from '@chat/shared'
 import type { ChatEntry } from '../state/chat-reducer'
-import { formatDayLabel, startOfDay } from './format'
+import { startOfDay } from './format'
 
 /** Consecutive messages from the same author closer than this are shown as one group. */
 export const GROUP_GAP_MS = 5 * 60_000
@@ -21,7 +21,8 @@ export type TimelineItem =
  */
 export function buildTimeline(
   messages: readonly ChatEntry[],
-  now: number = Date.now(),
+  /** Builds the separator text for a day, e.g. "Hoje" or "12 de setembro" (see formatDayLabel). */
+  dayLabel: (timestamp: number) => string,
   gapMs: number = GROUP_GAP_MS,
 ): TimelineItem[] {
   const items: TimelineItem[] = []
@@ -33,7 +34,7 @@ export function buildTimeline(
     if (day !== currentDay) {
       currentDay = day
       group = null
-      items.push({ kind: 'day', id: `day-${day}`, label: formatDayLabel(message.sentAt, now) })
+      items.push({ kind: 'day', id: `day-${day}`, label: dayLabel(message.sentAt) })
     }
 
     const last = group?.messages[group.messages.length - 1]

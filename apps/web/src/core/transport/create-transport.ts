@@ -1,3 +1,4 @@
+import { currentLanguage } from '../i18n/i18n'
 import type { ChatTransport } from './chat-transport'
 import { BroadcastChannelTransport } from './demo/broadcast-channel-transport'
 import { SocketIoTransport } from './socket-io-transport'
@@ -13,5 +14,7 @@ export function createTransport(
 ): ChatTransport {
   const forceDemo = new URLSearchParams(search).has('demo')
   const url = serverUrl?.trim()
-  return url && !forceDemo ? new SocketIoTransport(url) : new BroadcastChannelTransport()
+  return url && !forceDemo
+    ? new SocketIoTransport(url)
+    : new BroadcastChannelTransport({ getLanguage: currentLanguage })
 }

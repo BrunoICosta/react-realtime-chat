@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { botReply } from './demo-bot'
 
 const author = { id: 'u1', nickname: 'Bruno', color: '#6366f1' }
-const context = { now: new Date(2026, 8, 12, 14, 7), random: () => 0 }
+const context = { now: new Date(2026, 8, 12, 14, 7), random: () => 0, language: 'pt-BR' as const }
 
 describe('botReply', () => {
   it('greets by nickname, including accented greetings', () => {

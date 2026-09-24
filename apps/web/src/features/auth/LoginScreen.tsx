@@ -1,5 +1,6 @@
 import { AVATAR_COLORS, LIMITS, loginSchema, validationCodeOf } from '@chat/shared'
 import { useId, useState, type FormEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useErrorText } from '../../core/i18n/error-text'
 import {
   toErrorInfo,
@@ -22,19 +23,21 @@ interface LoginScreenProps {
   onToggleTheme: () => void
 }
 
-const COLOR_NAMES: Record<string, string> = {
-  '#6366f1': 'Índigo',
-  '#0ea5e9': 'Azul',
-  '#14b8a6': 'Turquesa',
-  '#22c55e': 'Verde',
-  '#eab308': 'Amarelo',
-  '#f97316': 'Laranja',
-  '#ef4444': 'Vermelho',
-  '#ec4899': 'Rosa',
-  '#a855f7': 'Roxo',
-}
+/** Translation key of each palette color (`auth.color.names.*`). */
+const COLOR_KEYS = {
+  '#6366f1': 'indigo',
+  '#0ea5e9': 'blue',
+  '#14b8a6': 'teal',
+  '#22c55e': 'green',
+  '#eab308': 'yellow',
+  '#f97316': 'orange',
+  '#ef4444': 'red',
+  '#ec4899': 'pink',
+  '#a855f7': 'purple',
+} as const satisfies Record<(typeof AVATAR_COLORS)[number], string>
 
 export function LoginScreen({ transport, onLoggedIn, theme, onToggleTheme }: LoginScreenProps) {
+  const { t } = useTranslation(['auth', 'common'])
   const [nickname, setNickname] = useState('')
   const [color, setColor] = useState<string>(AVATAR_COLORS[0])
   const [error, setError] = useState<ErrorInfo | null>(null)
@@ -76,14 +79,12 @@ export function LoginScreen({ transport, onLoggedIn, theme, onToggleTheme }: Log
           <span className="login__logo" aria-hidden="true">
             <Icon name="sparkles" size={26} />
           </span>
-          <h1 className="login__title">Realtime Chat</h1>
-          <p className="login__subtitle">
-            Salas, presença online e indicador de digitação em tempo real.
-          </p>
+          <h1 className="login__title">{t('common:appName')}</h1>
+          <p className="login__subtitle">{t('subtitle')}</p>
           {transport.mode === 'demo' && (
             <p className="login__demo">
               <DemoBadge />
-              <span>Sem servidor aqui: abra outra aba para conversar entre elas.</span>
+              <span>{t('demoHint')}</span>
             </p>
           )}
         </header>
@@ -91,14 +92,14 @@ export function LoginScreen({ transport, onLoggedIn, theme, onToggleTheme }: Log
         <form className="login__form" onSubmit={handleSubmit} noValidate>
           <div className="field">
             <label className="field__label" htmlFor={nicknameId}>
-              Seu apelido
+              {t('nickname.label')}
             </label>
             <input
               id={nicknameId}
               className="input"
               value={nickname}
               onChange={(event) => setNickname(event.target.value)}
-              placeholder="Como quer ser chamado?"
+              placeholder={t('nickname.placeholder')}
               autoComplete="nickname"
               autoFocus
               maxLength={LIMITS.nicknameMax}
@@ -106,15 +107,19 @@ export function LoginScreen({ transport, onLoggedIn, theme, onToggleTheme }: Log
               aria-describedby={error ? `${hintId} ${errorId}` : hintId}
             />
             <span className="field__hint" id={hintId}>
-              De {LIMITS.nicknameMin} a {LIMITS.nicknameMax} caracteres. Sem cadastro, sem senha.
+              {t('nickname.hint', { min: LIMITS.nicknameMin, max: LIMITS.nicknameMax })}
             </span>
           </div>
 
           <fieldset className="login__colors">
-            <legend className="field__label">Cor do avatar</legend>
+            <legend className="field__label">{t('color.legend')}</legend>
             <div className="login__swatches">
               {AVATAR_COLORS.map((swatch) => (
-                <label key={swatch} className="login__swatch" title={COLOR_NAMES[swatch]}>
+                <label
+                  key={swatch}
+                  className="login__swatch"
+                  title={t(`color.names.${COLOR_KEYS[swatch]}`)}
+                >
                   <input
                     type="radio"
                     name="avatar-color"
@@ -124,7 +129,7 @@ export function LoginScreen({ transport, onLoggedIn, theme, onToggleTheme }: Log
                     className="visually-hidden"
                   />
                   <span style={{ background: swatch }} aria-hidden="true" />
-                  <span className="visually-hidden">{COLOR_NAMES[swatch] ?? swatch}</span>
+                  <span className="visually-hidden">{t(`color.names.${COLOR_KEYS[swatch]}`)}</span>
                 </label>
               ))}
             </div>
@@ -133,8 +138,8 @@ export function LoginScreen({ transport, onLoggedIn, theme, onToggleTheme }: Log
           <div className="login__preview" aria-hidden="true">
             <Avatar user={preview} size="lg" />
             <div>
-              <strong>{nickname.trim() || 'Seu apelido'}</strong>
-              <span>é assim que vão te ver no chat</span>
+              <strong>{nickname.trim() || t('preview.placeholder')}</strong>
+              <span>{t('preview.caption')}</span>
             </div>
           </div>
 
@@ -147,13 +152,13 @@ export function LoginScreen({ transport, onLoggedIn, theme, onToggleTheme }: Log
 
           <button type="submit" className="btn btn--primary login__submit" disabled={submitting}>
             {submitting ? <span className="spinner" aria-hidden="true" /> : null}
-            {submitting ? 'Entrando…' : 'Entrar no chat'}
+            {submitting ? t('submitting') : t('submit')}
           </button>
         </form>
       </main>
 
       <footer className="login__footer">
-        Feito com React, Socket.io e TypeScript por{' '}
+        {t('footer')}{' '}
         <a href="https://github.com/BrunoICosta" target="_blank" rel="noreferrer">
           Bruno Costa
         </a>

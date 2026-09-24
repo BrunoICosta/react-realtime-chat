@@ -15,6 +15,7 @@ import {
   type SendMessageInput,
 } from '@chat/shared'
 import type { z } from 'zod'
+import { DEFAULT_LANGUAGE, type Language } from '../../i18n/languages'
 import { Emitter } from '../../lib/emitter'
 import {
   TransportError,
@@ -24,7 +25,8 @@ import {
 } from '../chat-transport'
 import { botReply } from './demo-bot'
 import { DemoStorage, type KeyValueStorage } from './demo-storage'
-import { AMBIENT_LINES, BOT_USER, isReservedNickname, simulatedUsersIn } from './demo-users'
+import { AMBIENT_LINES, localizeSeed } from './demo-content'
+import { BOT_USER, isReservedNickname, simulatedUsersIn } from './demo-users'
 
 /** The subset of `BroadcastChannel` the transport needs (easy to fake in tests). */
 export interface ChannelLike {
@@ -58,6 +60,8 @@ export interface DemoTransportOptions {
   peerTtlMs?: number
   /** Simulated users post small talk every now and then. */
   ambientChatter?: boolean
+  /** Language of this tab: the bot, seed messages and small talk follow it. */
+  getLanguage?: () => Language
 }
 
 type Timer = ReturnType<typeof setTimeout>
@@ -106,6 +110,7 @@ export class BroadcastChannelTransport implements ChatTransport {
       heartbeatMs: options.heartbeatMs ?? DEFAULTS.heartbeatMs,
       peerTtlMs: options.peerTtlMs ?? DEFAULTS.peerTtlMs,
       ambientChatter: options.ambientChatter ?? true,
+      getLanguage: options.getLanguage ?? (() => DEFAULT_LANGUAGE),
     }
     const storage =
       options.storage === undefined
@@ -217,7 +222,9 @@ export class BroadcastChannelTransport implements ChatTransport {
 
     return {
       room: this.summaryOf(room),
-      history: this.store.getHistory(id),
+      history: this.store
+        .getHistory(id)
+        .map((message) => localizeSeed(message, this.options.getLanguage())),
       users: this.usersIn(id),
     }
   }
@@ -370,6 +377,7 @@ export class BroadcastChannelTransport implements ChatTransport {
     const text = botReply(trigger.text, trigger.author, {
       now: new Date(),
       random: this.options.random,
+      language: this.options.getLanguage(),
     })
     const typingMs = 700 + Math.round(this.options.random() * 900)
     this.later(() => {
@@ -410,7 +418,7 @@ export class BroadcastChannelTransport implements ChatTransport {
     if (ids[0] !== this.peerId) return
 
     const occupied = [...this.joined, ...[...this.peers.values()].flatMap((peer) => peer.rooms)]
-    const candidates = Object.entries(AMBIENT_LINES)
+    const candidates = Object.entries(AMBIENT_LINES[this.options.getLanguage()])
       .filter(([roomId]) => occupied.includes(roomId))
       .flatMap(([roomId, lines]) => lines.map((line) => ({ roomId, ...line })))
       .filter((line) => line.text !== this.lastAmbientText)

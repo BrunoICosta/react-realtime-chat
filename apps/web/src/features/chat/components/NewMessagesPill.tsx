@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Icon } from '../../../shared/components/Icon'
 
 interface NewMessagesPillProps {
@@ -6,12 +7,12 @@ interface NewMessagesPillProps {
 }
 
 export function NewMessagesPill({ count, onClick }: NewMessagesPillProps) {
+  const { t } = useTranslation('chat')
   if (count <= 0) return null
-  const label = count === 1 ? '1 nova mensagem' : `${count > 99 ? '99+' : count} novas mensagens`
   return (
     <button type="button" className="new-messages-pill" onClick={onClick}>
       <Icon name="arrowDown" size={16} />
-      {label}
+      {t('messages.newMessages', { count: Math.min(count, 99) })}
     </button>
   )
 }

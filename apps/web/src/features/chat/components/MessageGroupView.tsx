@@ -1,4 +1,5 @@
 import { memo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Avatar } from '../../../shared/components/Avatar'
 import { Icon } from '../../../shared/components/Icon'
 import { formatFullDate, formatTime } from '../lib/format'
@@ -17,6 +18,8 @@ export const MessageGroupView = memo(function MessageGroupView({
   isOwn,
   onRetry,
 }: MessageGroupViewProps) {
+  const { t, i18n } = useTranslation('chat')
+  const locale = i18n.language
   return (
     <li className="msg-group" data-own={isOwn || undefined}>
       {!isOwn && <Avatar user={group.author} />}
@@ -26,13 +29,13 @@ export const MessageGroupView = memo(function MessageGroupView({
             className="msg-group__author"
             style={{ color: isOwn ? undefined : group.author.color }}
           >
-            {isOwn ? 'Você' : group.author.nickname}
+            {isOwn ? t('messages.you') : group.author.nickname}
           </span>
           <time
             dateTime={new Date(group.startedAt).toISOString()}
-            title={formatFullDate(group.startedAt)}
+            title={formatFullDate(group.startedAt, locale)}
           >
-            {formatTime(group.startedAt)}
+            {formatTime(group.startedAt, locale)}
           </time>
         </div>
         <ul className="msg-group__messages">
@@ -56,13 +59,14 @@ function MessageBubble({
   message: ChatEntry
   onRetry: (clientId: string) => void
 }) {
+  const { t, i18n } = useTranslation('chat')
   const emojiOnly = isEmojiOnly(message.text)
   return (
     <li className="msg" data-status={message.status}>
       <p
         className="msg__bubble"
         data-emoji={emojiOnly || undefined}
-        title={formatFullDate(message.sentAt)}
+        title={formatFullDate(message.sentAt, i18n.language)}
       >
         {splitLinks(message.text).map((part, index) =>
           part.kind === 'link' ? (
@@ -74,14 +78,14 @@ function MessageBubble({
           ),
         )}
       </p>
-      {message.status === 'pending' && <span className="msg__state">enviando…</span>}
+      {message.status === 'pending' && <span className="msg__state">{t('messages.sending')}</span>}
       {message.status === 'failed' && message.clientId && (
         <span className="msg__state msg__state--failed" role="status">
           <Icon name="alert" size={14} />
-          Não enviada.
+          {t('messages.failed')}
           <button type="button" onClick={() => message.clientId && onRetry(message.clientId)}>
             <Icon name="retry" size={14} />
-            Tentar de novo
+            {t('messages.retry')}
           </button>
         </span>
       )}

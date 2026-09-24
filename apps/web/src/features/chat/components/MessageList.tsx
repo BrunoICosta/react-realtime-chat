@@ -1,7 +1,9 @@
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useErrorText } from '../../../core/i18n/error-text'
 import type { ErrorInfo } from '../../../core/transport/chat-transport'
 import { Icon } from '../../../shared/components/Icon'
+import { formatDayLabel } from '../lib/format'
 import { buildTimeline } from '../lib/group-messages'
 import type { ChatEntry } from '../state/chat-reducer'
 import { MessageGroupView } from './MessageGroupView'
@@ -24,7 +26,17 @@ export function MessageList({
   error,
   onRetry,
 }: MessageListProps) {
-  const timeline = useMemo(() => buildTimeline(messages), [messages])
+  const { t, i18n } = useTranslation('chat')
+  const locale = i18n.language
+  const today = t('messages.today')
+  const yesterday = t('messages.yesterday')
+  const timeline = useMemo(
+    () =>
+      buildTimeline(messages, (timestamp) =>
+        formatDayLabel(timestamp, { locale, today, yesterday }),
+      ),
+    [messages, locale, today, yesterday],
+  )
   const errorText = useErrorText()
 
   if (error && messages.length === 0) {
@@ -52,7 +64,7 @@ export function MessageList({
             </div>
           ))}
         </div>
-        <span className="visually-hidden">Carregando mensagens…</span>
+        <span className="visually-hidden">{t('messages.loading')}</span>
       </div>
     )
   }
@@ -63,10 +75,8 @@ export function MessageList({
         <span className="messages__empty-icon" aria-hidden="true">
           👋
         </span>
-        <p>
-          Nenhuma mensagem em <strong>#{roomName}</strong> ainda.
-        </p>
-        <p>Que tal dizer oi?</p>
+        <p>{t('messages.empty', { room: roomName })}</p>
+        <p>{t('messages.emptyHint')}</p>
       </div>
     )
   }

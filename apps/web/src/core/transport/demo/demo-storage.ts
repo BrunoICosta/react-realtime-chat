@@ -1,4 +1,5 @@
 import { DEFAULT_ROOMS, LIMITS, type ChatMessage, type Room } from '@chat/shared'
+import { SEED_TEXTS } from './demo-content'
 import { BOT_USER, DIEGO, MARINA } from './demo-users'
 
 export interface KeyValueStorage {
@@ -95,39 +96,25 @@ function createSeed(now: number): DemoSnapshot {
     createdBy: null,
   }))
 
-  const seed = (
-    roomId: string,
-    minutesAgo: number,
-    author: ChatMessage['author'],
-    text: string,
-  ): ChatMessage => ({
-    id: `seed-${roomId}-${minutesAgo}`,
-    roomId,
-    author,
-    text,
-    sentAt: now - minutesAgo * MINUTE,
-  })
+  // Stored in pt-BR; the transport re-localizes seed messages when they are read.
+  const seed = (roomId: string, minutesAgo: number, author: ChatMessage['author']): ChatMessage => {
+    const id = `seed-${roomId}-${minutesAgo}`
+    return {
+      id,
+      roomId,
+      author,
+      text: SEED_TEXTS['pt-BR'][id] ?? '',
+      sentAt: now - minutesAgo * MINUTE,
+    }
+  }
 
   return {
     version: 1,
     rooms,
     messages: {
-      geral: [
-        seed('geral', 12, MARINA, 'Bom dia, pessoal! ☀️'),
-        seed(
-          'geral',
-          3,
-          BOT_USER,
-          'Oi! Eu sou a Lia, o bot deste modo demo 🤖 Mande uma mensagem aqui em #geral que eu respondo. ' +
-            'Abra esta página em outra aba para ver o chat em tempo real entre abas.',
-        ),
-      ],
-      dev: [
-        seed('dev', 50, MARINA, 'Alguém já testou o Vite 8? O build ficou absurdo de rápido ⚡'),
-        seed('dev', 48, DIEGO, 'Testei! O Rolldown por baixo faz muita diferença.'),
-        seed('dev', 47, DIEGO, 'E o HMR continua instantâneo.'),
-      ],
-      random: [seed('random', 30, DIEGO, 'Bom dia! ☕')],
+      geral: [seed('geral', 12, MARINA), seed('geral', 3, BOT_USER)],
+      dev: [seed('dev', 50, MARINA), seed('dev', 48, DIEGO), seed('dev', 47, DIEGO)],
+      random: [seed('random', 30, DIEGO)],
     },
   }
 }

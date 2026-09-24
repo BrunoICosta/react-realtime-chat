@@ -1,15 +1,17 @@
 import { useEffect } from 'react'
-
-const BASE_TITLE = 'Realtime Chat'
+import { useTranslation } from 'react-i18next'
 
 /** "(3) #geral · Realtime Chat" — lets people notice new messages from another tab. */
 export function useDocumentTitle(roomName: string, unread: number) {
+  const { t } = useTranslation(['common', 'chat'])
+
   useEffect(() => {
+    const app = t('appName')
     const prefix = unread > 0 ? `(${unread > 99 ? '99+' : unread}) ` : ''
-    const room = roomName ? `#${roomName} · ` : ''
-    document.title = `${prefix}${room}${BASE_TITLE}`
+    const base = roomName ? t('chat:title', { room: roomName, app }) : app
+    document.title = `${prefix}${base}`
     return () => {
-      document.title = BASE_TITLE
+      document.title = app
     }
-  }, [roomName, unread])
+  }, [roomName, unread, t])
 }

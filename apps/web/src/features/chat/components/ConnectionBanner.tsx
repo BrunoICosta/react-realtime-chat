@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { ConnectionStatus } from '../../../core/transport/chat-transport'
 import { Icon } from '../../../shared/components/Icon'
 import './ConnectionBanner.css'
@@ -12,6 +13,7 @@ const RECOVERED_VISIBLE_MS = 2_500
 
 /** Explains connection problems and confirms when the connection comes back. */
 export function ConnectionBanner({ status, everConnected }: ConnectionBannerProps) {
+  const { t } = useTranslation('chat')
   const [recovered, setRecovered] = useState(false)
   const previousRef = useRef(status)
 
@@ -26,11 +28,11 @@ export function ConnectionBanner({ status, everConnected }: ConnectionBannerProp
 
   let content: { tone: 'info' | 'warning' | 'success'; text: string } | null = null
   if (status === 'reconnecting' || (status === 'connecting' && everConnected)) {
-    content = { tone: 'warning', text: 'Conexão perdida. Tentando reconectar…' }
+    content = { tone: 'warning', text: t('connection.lost') }
   } else if (status === 'connecting') {
-    content = { tone: 'info', text: 'Conectando ao chat…' }
+    content = { tone: 'info', text: t('connection.connecting') }
   } else if (status === 'connected' && recovered) {
-    content = { tone: 'success', text: 'Conexão restabelecida' }
+    content = { tone: 'success', text: t('connection.recovered') }
   }
 
   return (

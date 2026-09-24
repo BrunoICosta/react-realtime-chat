@@ -1,4 +1,5 @@
 import { useEffect, useRef, type KeyboardEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import { QUICK_EMOJIS } from '../lib/emojis'
 
 interface EmojiPickerProps {
@@ -9,6 +10,7 @@ interface EmojiPickerProps {
 
 /** A small, dependency-free emoji palette. Arrow keys move between emojis, Esc closes. */
 export function EmojiPicker({ id, onPick, onClose }: EmojiPickerProps) {
+  const { t } = useTranslation('chat')
   const ref = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -51,7 +53,7 @@ export function EmojiPicker({ id, onPick, onClose }: EmojiPickerProps) {
       id={id}
       className="emoji-picker"
       role="dialog"
-      aria-label="Escolher emoji"
+      aria-label={t('emoji.dialog')}
       onKeyDown={handleKeyDown}
     >
       <div className="emoji-picker__grid">
@@ -61,7 +63,7 @@ export function EmojiPicker({ id, onPick, onClose }: EmojiPickerProps) {
             type="button"
             className="emoji-picker__item"
             onClick={() => onPick(emoji)}
-            aria-label={`Inserir ${emoji}`}
+            aria-label={t('emoji.insert', { emoji })}
           >
             {emoji}
           </button>
