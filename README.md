@@ -1,5 +1,7 @@
 # Realtime Chat
 
+🇧🇷 Português · [🇺🇸 English](README.en.md)
+
 Chat em tempo real com salas, presença online, indicador de "digitando..." e histórico por sala,
 construído como um monorepo **npm workspaces**: um front-end em **React 19 + Vite**, um servidor
 **Node 22 + Express + Socket.io** e um pacote compartilhado com os **contratos tipados dos eventos**
@@ -28,7 +30,9 @@ um segundo transporte que simula o backend dentro do navegador (abas conversam e
 - **Banner de reconexão** ("Conexão perdida. Tentando reconectar…" / "Conexão restabelecida") e
   reentrada automática nas salas com merge do histórico.
 - **Rate limiting** por socket (token bucket) com aviso na interface.
-- Horários em **pt-BR**, **tema claro/escuro** (segue o sistema e lembra a escolha), layout
+- **Português (pt-BR) e inglês**: seletor de idioma no topo, detecção automática, datas no
+  formato do idioma e até o bot do modo demo responde no idioma escolhido.
+- **Tema claro/escuro** (segue o sistema e lembra a escolha), layout
   **responsivo** com gavetas no mobile e foco em **acessibilidade** (labels, `aria-live`,
   `role="log"`, foco visível, navegação por teclado no seletor de emoji).
 
@@ -37,6 +41,7 @@ um segundo transporte que simula o backend dentro do navegador (abas conversam e
 | Camada    | Tecnologias                                                                                   |
 | --------- | --------------------------------------------------------------------------------------------- |
 | Web       | React 19.2, Vite 8.2, TypeScript 6.0, socket.io-client 4.8, CSS puro com design tokens        |
+| i18n      | i18next 26, react-i18next 17, i18next-browser-languagedetector 8                              |
 | Server    | Node 22, Express 5.2, Socket.io 4.8, jsonwebtoken 9, zod 4.4, tsx 4 (dev)                     |
 | Shared    | Tipos de eventos (`ClientToServerEvents` / `ServerToClientEvents`), modelos e schemas zod     |
 | Testes    | Vitest 4.1, Testing Library (React 16, user-event 14, jest-dom 7), jsdom 30, socket.io-client |
@@ -135,7 +140,7 @@ em produção) e `JWT_EXPIRES_IN_SECONDS`.
 │   │   └── test/              # testes de integração com socket.io-client
 │   └── web
 │       └── src
-│           ├── core/          # transporte (interface, Socket.io, demo), sessão, tema
+│           ├── core/          # transporte (interface, Socket.io, demo), i18n, sessão, tema
 │           ├── features/
 │           │   ├── auth/      # tela de login
 │           │   └── chat/      # provider + reducer, componentes, hooks e helpers
@@ -145,6 +150,37 @@ em produção) e `JWT_EXPIRES_IN_SECONDS`.
 │   └── shared/src             # eventos tipados, modelos, schemas zod, constantes
 └── .github/workflows          # CI e deploy no GitHub Pages
 ```
+
+## Internacionalização
+
+A interface inteira existe em **português (pt-BR, padrão)** e **inglês**: textos, `aria-label`s,
+placeholders, mensagens de validação, avisos, estados vazios e de erro e o título da aba.
+
+- **Como funciona.** `apps/web/src/core/i18n` configura o **i18next** com
+  **react-i18next** e o **i18next-browser-languagedetector**. O idioma inicial é: escolha salva
+  (`localStorage`, chave `rrc:lang`) > idioma do navegador (`pt*` vira `pt-BR`, o resto vira
+  `en`) > `pt-BR`. Trocar no seletor do topo salva a escolha e atualiza `<html lang>`.
+- **Recursos tipados.** `locales/pt-BR.ts` é a fonte da verdade, dividida em namespaces
+  (`common`, `auth`, `chat`, `errors`). `locales/en.ts` usa `satisfies Resources`, então
+  esquecer uma chave quebra o `tsc`; o `CustomTypeOptions` do i18next deixa as chaves usadas em
+  `t()` verificadas pelo compilador. Um teste ainda compara as chaves dos dois idiomas.
+- **Erros como códigos.** O servidor e os schemas zod compartilhados não devolvem texto: acks e
+  respostas HTTP trazem um `ErrorCode` (`CONFLICT`, `RATE_LIMITED`...) e, em validações, um
+  `ValidationCode` (`NICKNAME_TOO_SHORT`...). O front traduz (`useErrorText`), então o mesmo
+  servidor atende qualquer idioma.
+- **Datas e plurais.** Horários e separadores de dia usam `Intl.DateTimeFormat` com o idioma
+  ativo ("Hoje"/"Today", "12 de setembro"/"September 12"); contagens usam os plurais do i18next.
+- **Modo demo.** O bot, as mensagens iniciais e a conversa simulada existem nos dois idiomas
+  (`core/transport/demo/demo-content.ts`); o bot entende palavras-chave em ambos e responde no
+  idioma da aba. Apelidos e mensagens digitadas pelas pessoas nunca são traduzidos.
+
+**Adicionar um idioma** (ex.: espanhol):
+
+1. Inclua o código em `SUPPORTED_LANGUAGES` e o nome em `LANGUAGE_NAMES`
+   (`core/i18n/languages.ts`) e ajuste `toSupportedLanguage` (`es*` -> `es`).
+2. Crie `core/i18n/locales/es.ts` com `satisfies Resources` (o compilador aponta as chaves que
+   faltam) e registre em `resources` (`core/i18n/i18n.ts`).
+3. Adicione os textos do bot e do conteúdo demo em `demo-bot.ts` e `demo-content.ts`.
 
 ## Próximos passos
 
