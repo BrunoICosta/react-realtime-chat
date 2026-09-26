@@ -27,4 +27,19 @@ describe('botReply', () => {
   it('falls back to a generic reply chosen by the random source', () => {
     expect(botReply('xyz', author, { ...context, random: () => 0.99 })).toContain('ajuda')
   })
+
+  describe('in English', () => {
+    const english = { ...context, language: 'en' as const }
+
+    it('greets and answers commands in English', () => {
+      expect(botReply('hello there', author, english)).toBe('Hi, Bruno! 👋 Great to see you here.')
+      expect(botReply('hi, tell me a joke', author, english)).toContain('JavaScript developer')
+      expect(botReply('what time is it?', author, english)).toBe('It is 02:07 PM over here ⏰')
+    })
+
+    it('understands Portuguese keywords but answers in the active language', () => {
+      expect(botReply('oi', author, english)).toBe('Hi, Bruno! 👋 Great to see you here.')
+      expect(botReply('ajuda', author, english)).toContain('This is demo mode')
+    })
+  })
 })

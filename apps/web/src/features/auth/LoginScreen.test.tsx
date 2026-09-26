@@ -1,6 +1,7 @@
-import { render, screen } from '@testing-library/react'
+import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
+import { i18n } from '../../core/i18n/i18n'
 import { TransportError } from '../../core/transport/chat-transport'
 import { LoginScreen } from './LoginScreen'
 
@@ -52,5 +53,31 @@ describe('<LoginScreen />', () => {
   it('explains the demo mode when there is no server', () => {
     setup(vi.fn(), 'demo')
     expect(screen.getByText('modo demo')).toBeInTheDocument()
+  })
+
+  it('renders in English, including validation and server errors', async () => {
+    await act(() => i18n.changeLanguage('en'))
+    const login = vi.fn().mockRejectedValue(new TransportError('CONFLICT'))
+    const { user } = setup(login, 'demo')
+
+    expect(screen.getByRole('heading', { name: 'Realtime Chat' })).toBeInTheDocument()
+    expect(screen.getByText('demo mode')).toBeInTheDocument()
+    expect(screen.getByRole('radio', { name: 'Green' })).toBeInTheDocument()
+
+    await user.type(screen.getByLabelText('Your nickname'), 'a{Enter}')
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Your nickname needs at least 2 characters.',
+    )
+
+    await user.type(screen.getByLabelText('Your nickname'), 'na{Enter}')
+    expect(await screen.findByRole('alert')).toHaveTextContent('That nickname is in use right now.')
+    expect(screen.getByRole('button', { name: 'Join the chat' })).toBeEnabled()
+  })
+
+  it('switches language without losing what was typed', async () => {
+    const { user } = setup()
+    await user.type(screen.getByLabelText('Seu apelido'), 'Ana')
+    await act(() => i18n.changeLanguage('en'))
+    expect(screen.getByLabelText('Your nickname')).toHaveValue('Ana')
   })
 })

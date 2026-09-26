@@ -1,5 +1,6 @@
 import type { ChatMessage, PresencePayload, TypingPayload } from '@chat/shared'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { Language } from '../../i18n/languages'
 import type { Session } from '../chat-transport'
 import { BroadcastChannelTransport, type ChannelLike } from './broadcast-channel-transport'
 import type { KeyValueStorage } from './demo-storage'
@@ -50,13 +51,14 @@ describe('BroadcastChannelTransport', () => {
     vi.useRealTimers()
   })
 
-  function createTab() {
+  function createTab(language: Language = 'pt-BR') {
     return new BroadcastChannelTransport({
       createChannel,
       storage,
       latencyMs: 0,
       ambientChatter: false,
       random: () => 0,
+      getLanguage: () => language,
     })
   }
 
@@ -160,6 +162,25 @@ describe('BroadcastChannelTransport', () => {
     await connect(later, 'Caio')
     const result = await join(later, 'random')
     expect(result.history.map((message) => message.text)).toContain('deixando um recado')
+  })
+
+  it('speaks the language of the tab: seed history and bot replies', async () => {
+    const tab = createTab('en')
+    await connect(tab, 'Ana')
+    const result = await join(tab, 'geral')
+    expect(result.history.map((message) => message.text)).toContain('Good morning, everyone! ☀️')
+
+    const messages: ChatMessage[] = []
+    tab.on('message:new', (message) => messages.push(message))
+    await send(tab, 'geral', 'hello')
+    await vi.advanceTimersByTimeAsync(2_500)
+    expect(messages.at(-1)?.text).toBe('Hi, Ana! 👋 Great to see you here.')
+
+    // The same stored seed is shown in Portuguese to a pt-BR tab.
+    const other = createTab('pt-BR')
+    await connect(other, 'Bia')
+    const again = await join(other, 'geral')
+    expect(again.history.map((message) => message.text)).toContain('Bom dia, pessoal! ☀️')
   })
 
   it('lets the bot answer in #geral after showing it typing', async () => {
