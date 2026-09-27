@@ -19,7 +19,7 @@ over `BroadcastChannel`, and a bot replies in `#geral`.
 - Rooms with unread badges, room creation, messages grouped by author and day, optimistic sending with retry.
 - Smart auto-scroll with a "new messages" pill, typing indicator, online users per room, reconnect banner.
 - Per-socket rate limiting (token bucket) and zod validation of every payload.
-- **Portuguese (pt-BR) and English**, with automatic detection and a language switcher.
+- **Portuguese (pt-BR) and English**, with automatic detection and a flag-based language switcher (inline SVG).
 - Light/dark theme, responsive layout and accessibility (labels, `aria-live`, keyboard navigation).
 
 ## Architecture

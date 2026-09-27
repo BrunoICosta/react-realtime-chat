@@ -1,48 +1,68 @@
-import { useId } from 'react'
+import { useRef, type KeyboardEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { LANGUAGE_NAMES, SUPPORTED_LANGUAGES, toSupportedLanguage } from '../../core/i18n/languages'
+import {
+  LANGUAGE_NAMES,
+  SUPPORTED_LANGUAGES,
+  toSupportedLanguage,
+  type Language,
+} from '../../core/i18n/languages'
+import { Flag } from './Flag'
 import './LanguageSwitcher.css'
 
-/** Native select (keyboard and screen reader friendly) styled as a compact pill. */
+/**
+ * Two flag buttons acting as a radio group (a native <select> cannot show SVG).
+ * Tab reaches the active flag; arrow keys move and select, like any radio group.
+ */
 export function LanguageSwitcher() {
   const { t, i18n } = useTranslation()
-  const id = useId()
   const current = toSupportedLanguage(i18n.resolvedLanguage ?? i18n.language)
+  const buttons = useRef<Partial<Record<Language, HTMLButtonElement | null>>>({})
+
+  function select(language: Language) {
+    if (language !== current) void i18n.changeLanguage(language)
+  }
+
+  function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    const step = { ArrowRight: 1, ArrowDown: 1, ArrowLeft: -1, ArrowUp: -1 }[event.key]
+    if (step === undefined) return
+    event.preventDefault()
+    const index = SUPPORTED_LANGUAGES.indexOf(current)
+    const count = SUPPORTED_LANGUAGES.length
+    const next = SUPPORTED_LANGUAGES[(index + step + count) % count]
+    if (!next) return
+    select(next)
+    buttons.current[next]?.focus()
+  }
 
   return (
-    <div className="lang-switcher">
-      <label htmlFor={id} className="visually-hidden">
-        {t('language.label')}
-      </label>
-      <svg
-        aria-hidden="true"
-        viewBox="0 0 24 24"
-        width="16"
-        height="16"
-        className="lang-switcher__icon"
-      >
-        <path
-          d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm-9-9h18M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3Z"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
-      <select
-        id={id}
-        className="lang-switcher__select"
-        value={current}
-        title={t('language.label')}
-        onChange={(event) => void i18n.changeLanguage(event.target.value)}
-      >
-        {SUPPORTED_LANGUAGES.map((language) => (
-          <option key={language} value={language} lang={language}>
-            {LANGUAGE_NAMES[language]}
-          </option>
-        ))}
-      </select>
+    <div
+      className="lang-switcher"
+      role="radiogroup"
+      aria-label={t('language.label')}
+      onKeyDown={handleKeyDown}
+    >
+      {SUPPORTED_LANGUAGES.map((language) => {
+        const active = language === current
+        return (
+          <button
+            key={language}
+            ref={(element) => {
+              buttons.current[language] = element
+            }}
+            type="button"
+            role="radio"
+            aria-checked={active}
+            tabIndex={active ? 0 : -1}
+            lang={language}
+            aria-label={LANGUAGE_NAMES[language]}
+            title={LANGUAGE_NAMES[language]}
+            className="lang-switcher__option"
+            onClick={() => select(language)}
+          >
+            <Flag language={language} />
+          </button>
+        )
+      })}
     </div>
   )
 }

@@ -30,7 +30,7 @@ um segundo transporte que simula o backend dentro do navegador (abas conversam e
 - **Banner de reconexão** ("Conexão perdida. Tentando reconectar…" / "Conexão restabelecida") e
   reentrada automática nas salas com merge do histórico.
 - **Rate limiting** por socket (token bucket) com aviso na interface.
-- **Português (pt-BR) e inglês**: seletor de idioma no topo, detecção automática, datas no
+- **Português (pt-BR) e inglês**: seletor de idioma com bandeiras (SVG inline) no topo, detecção automática, datas no
   formato do idioma e até o bot do modo demo responde no idioma escolhido.
 - **Tema claro/escuro** (segue o sistema e lembra a escolha), layout
   **responsivo** com gavetas no mobile e foco em **acessibilidade** (labels, `aria-live`,
@@ -159,7 +159,7 @@ placeholders, mensagens de validação, avisos, estados vazios e de erro e o tí
 - **Como funciona.** `apps/web/src/core/i18n` configura o **i18next** com
   **react-i18next** e o **i18next-browser-languagedetector**. O idioma inicial é: escolha salva
   (`localStorage`, chave `rrc:lang`) > idioma do navegador (`pt*` vira `pt-BR`, o resto vira
-  `en`) > `pt-BR`. Trocar no seletor do topo salva a escolha e atualiza `<html lang>`.
+  `en`) > `pt-BR`. Trocar pelas bandeiras do topo (um `radiogroup` acessível, navegável com as setas) salva a escolha e atualiza `<html lang>`.
 - **Recursos tipados.** `locales/pt-BR.ts` é a fonte da verdade, dividida em namespaces
   (`common`, `auth`, `chat`, `errors`). `locales/en.ts` usa `satisfies Resources`, então
   esquecer uma chave quebra o `tsc`; o `CustomTypeOptions` do i18next deixa as chaves usadas em

@@ -9,7 +9,7 @@ export const LANGUAGE_STORAGE_KEY = 'rrc:lang'
 
 /** Names shown in the switcher, always in their own language. */
 export const LANGUAGE_NAMES: Record<Language, string> = {
-  'pt-BR': 'Português',
+  'pt-BR': 'Português (Brasil)',
   en: 'English',
 }
 
