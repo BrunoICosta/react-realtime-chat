@@ -30,7 +30,7 @@ export type Unsubscribe = () => void
  *
  * - `SocketIoTransport` talks to the real Node server.
  * - `BroadcastChannelTransport` fakes a server inside the browser so the static
- *   GitHub Pages build still works (tabs chat with each other, plus a bot).
+ *   static demo build (no server) still works (tabs chat with each other, plus a bot).
  */
 export interface ChatTransport {
   readonly mode: TransportMode

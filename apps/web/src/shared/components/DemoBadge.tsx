@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import './DemoBadge.css'
 
-/** Tells the visitor this build has no server behind it (GitHub Pages). */
+/** Tells the visitor this build has no server behind it (static demo deployment). */
 export function DemoBadge() {
   const { t } = useTranslation()
   return (

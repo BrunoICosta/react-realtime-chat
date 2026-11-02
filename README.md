@@ -5,11 +5,11 @@
 Chat em tempo real com salas, presença online, indicador de "digitando..." e histórico por sala,
 construído como um monorepo **npm workspaces**: um front-end em **React 19 + Vite**, um servidor
 **Node 22 + Express + Socket.io** e um pacote compartilhado com os **contratos tipados dos eventos**
-e os **schemas zod** usados pelos dois lados. Como o GitHub Pages não roda servidor, o front tem
+e os **schemas zod** usados pelos dois lados. Como a demo publicada é estática (sem servidor), o front tem
 um segundo transporte que simula o backend dentro do navegador (abas conversam entre si via
 `BroadcastChannel` e um bot responde em `#geral`).
 
-**Demo:** https://brunoicosta.github.io/react-realtime-chat/ (modo demo, sem servidor; abra em duas abas)
+**Demo:** https://portfolio.brunoisaac.dev/react-realtime-chat/ (modo demo, sem servidor; abra em duas abas)
 
 ![Tela do chat com salas, mensagens agrupadas e pessoas online](docs/screenshot.png)
 
@@ -46,7 +46,7 @@ um segundo transporte que simula o backend dentro do navegador (abas conversam e
 | Shared    | Tipos de eventos (`ClientToServerEvents` / `ServerToClientEvents`), modelos e schemas zod     |
 | Testes    | Vitest 4.1, Testing Library (React 16, user-event 14, jest-dom 7), jsdom 30, socket.io-client |
 | Qualidade | ESLint 10 + typescript-eslint 8, Prettier 3, TypeScript `strict` + `noUncheckedIndexedAccess` |
-| CI/CD     | GitHub Actions (lint, testes, build) e deploy do `apps/web` no GitHub Pages                   |
+| CI/CD     | GitHub Actions (lint, testes, build); demo publicada na Cloudflare (Workers static assets)    |
 
 ## Arquitetura e decisões
 
@@ -70,7 +70,7 @@ apps/web  ──(ChatTransport)──┬── SocketIoTransport ──── We
   - `SocketIoTransport`, usado quando `VITE_SERVER_URL` está definido: faz login via
     `POST /api/login`, conecta com o JWT no handshake e usa _acks_ com timeout
     (`emitWithAck`) para transformar cada pedido em uma `Promise`.
-  - `BroadcastChannelTransport` (**modo demo**, padrão no GitHub Pages): cada aba é um "peer"
+  - `BroadcastChannelTransport` (**modo demo**, padrão na demo publicada): cada aba é um "peer"
     que anuncia sua presença e as salas em que está por `BroadcastChannel`, com heartbeat e
     expiração de peers que somem. Salas e histórico ficam no `localStorage` (compartilhado entre
     as abas), há usuários simulados online e a **Lia (bot)** responde em `#geral` mostrando o
@@ -124,6 +124,14 @@ Variáveis do servidor (veja `apps/server/.env.example`; um `.env` em `apps/serv
 automaticamente): `PORT`, `CORS_ORIGIN` (lista separada por vírgula), `JWT_SECRET` (obrigatório
 em produção) e `JWT_EXPIRES_IN_SECONDS`.
 
+## Deploy
+
+Publicado na Cloudflare (Workers static assets) em https://portfolio.brunoisaac.dev/react-realtime-chat/ pelo pipeline do
+repositório [portfolio](https://github.com/BrunoICosta/portfolio). Esse pipeline roda
+`npm run build:cf` na raiz deste repositório, que gera só o `apps/web` em **modo demo** (sem
+`VITE_SERVER_URL`) com base `/react-realtime-chat/` em `apps/web/dist`. O servidor Node não é
+publicado: para usá-lo, rode localmente com `npm run dev`.
+
 ## Estrutura de pastas
 
 ```
@@ -148,7 +156,7 @@ em produção) e `JWT_EXPIRES_IN_SECONDS`.
 │           └── styles/        # tokens de design e primitivas
 ├── packages
 │   └── shared/src             # eventos tipados, modelos, schemas zod, constantes
-└── .github/workflows          # CI e deploy no GitHub Pages
+└── .github/workflows          # CI (lint, typecheck, testes, build)
 ```
 
 ## Internacionalização

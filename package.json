@@ -21,7 +21,8 @@
     "format": "prettier --write .",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
-    "build": "npm run build --workspaces --if-present"
+    "build": "npm run build --workspaces --if-present",
+    "build:cf": "npm run build -w @chat/web -- --mode demo --base=/react-realtime-chat/"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

@@ -28,7 +28,7 @@ const TEXTS: Record<Language, Texts> = {
     time: (time) => `Agora são ${time} por aqui ⏰`,
     server:
       'Com o servidor Node rodando (npm run dev), o app usa Socket.io de verdade: JWT, salas, ' +
-      'presença e rate limiting. Aqui no GitHub Pages eu simulo tudo isso no navegador 🤖',
+      'presença e rate limiting. Nesta demo estática eu simulo tudo isso no navegador 🤖',
     thanks: 'De nada! 💜',
     bye: (name) => `Até mais, ${name}! 👋`,
     jokes: [
@@ -54,7 +54,7 @@ const TEXTS: Record<Language, Texts> = {
     time: (time) => `It is ${time} over here ⏰`,
     server:
       'With the Node server running (npm run dev) the app uses real Socket.io: JWT, rooms, ' +
-      'presence and rate limiting. Here on GitHub Pages I simulate all of that in the browser 🤖',
+      'presence and rate limiting. In this static demo I simulate all of that in the browser 🤖',
     thanks: "You're welcome! 💜",
     bye: (name) => `See you, ${name}! 👋`,
     jokes: [

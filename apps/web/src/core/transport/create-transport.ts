@@ -6,7 +6,7 @@ import { SocketIoTransport } from './socket-io-transport'
 /**
  * Picks the transport at startup:
  * - `VITE_SERVER_URL` set (local dev, self-hosted) -> real Socket.io server;
- * - otherwise (GitHub Pages) or `?demo` in the URL -> in-browser demo mode.
+ * - otherwise (the static demo build) or `?demo` in the URL -> in-browser demo mode.
  */
 export function createTransport(
   serverUrl: string | undefined = import.meta.env.VITE_SERVER_URL,

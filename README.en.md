@@ -5,11 +5,11 @@
 A real-time chat app with rooms, online presence, a "someone is typing..." indicator and per-room
 history. It is an **npm workspaces** monorepo with a **React 19 + Vite** front end, a
 **Node 22 + Express + Socket.io** server and a shared package that holds the **typed event
-contracts** and the **zod schemas** both sides use. GitHub Pages cannot run a server, so the front
+contracts** and the **zod schemas** both sides use. The published demo is static (no server), so the front
 end has a second transport that simulates the backend in the browser: tabs talk to each other
 over `BroadcastChannel`, and a bot replies in `#geral`.
 
-**Demo:** https://brunoicosta.github.io/react-realtime-chat/ (demo mode, no server; open it in two tabs)
+**Demo:** https://portfolio.brunoisaac.dev/react-realtime-chat/ (demo mode, no server; open it in two tabs)
 
 ![Chat screen with rooms, grouped messages and online people](docs/screenshot.png)
 
@@ -27,7 +27,7 @@ over `BroadcastChannel`, and a bot replies in `#geral`.
 - `packages/shared`: `ClientToServerEvents` / `ServerToClientEvents`, models and zod schemas, typing the Socket.io server and client.
 - `apps/server`: Express + Socket.io with an in-memory store (capped history per room), JWT auth middleware, rate limiting, and tests that use `socket.io-client` against an ephemeral server.
 - `apps/web`: talks only to a `ChatTransport` interface with two implementations:
-  `SocketIoTransport` (when `VITE_SERVER_URL` is set) and `BroadcastChannelTransport` (demo mode, the default on Pages, with simulated presence and a bot).
+  `SocketIoTransport` (when `VITE_SERVER_URL` is set) and `BroadcastChannelTransport` (demo mode, the default in the published demo, with simulated presence and a bot).
 
 ## Internationalization
 
@@ -36,6 +36,13 @@ The initial language comes from the saved choice, then the browser language (`pt
 The server returns **error codes only** and the web app translates them. Dates use the active locale.
 The demo bot, seed messages and simulated chatter follow the language of the tab.
 Adding a language is covered in the Portuguese README ("Internacionalização").
+
+## Deploy
+
+Published on Cloudflare (Workers static assets) at https://portfolio.brunoisaac.dev/react-realtime-chat/ by the pipeline of the
+[portfolio](https://github.com/BrunoICosta/portfolio) repository. It runs `npm run build:cf` at the
+root of this repo, which builds only `apps/web` in **demo mode** with base `/react-realtime-chat/`
+into `apps/web/dist`. The Node server is not deployed; run it locally with `npm run dev`.
 
 ## Running locally
 
