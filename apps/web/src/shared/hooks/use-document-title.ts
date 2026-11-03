@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 
-/** "(3) #geral · Realtime Chat" — lets people notice new messages from another tab. */
+/** "(3) #geral · Realtime Chat", lets people notice new messages from another tab. */
 export function useDocumentTitle(roomName: string, unread: number) {
   const { t } = useTranslation(['common', 'chat'])
 

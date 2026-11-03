@@ -19,7 +19,7 @@ export function formatTime(timestamp: number, locale: string): string {
   return formatter(locale, { hour: '2-digit', minute: '2-digit' }).format(timestamp)
 }
 
-/** "sábado, 12 de setembro de 2026 às 14:05" — used as tooltip. */
+/** "sábado, 12 de setembro de 2026 às 14:05", used as tooltip. */
 export function formatFullDate(timestamp: number, locale: string): string {
   return formatter(locale, { dateStyle: 'full', timeStyle: 'short' }).format(timestamp)
 }

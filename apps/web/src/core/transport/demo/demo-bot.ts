@@ -34,7 +34,7 @@ const TEXTS: Record<Language, Texts> = {
     jokes: [
       'Por que o JavaScript foi ao terapeuta? Porque tinha muitos problemas de "this" 😅',
       'Existem 10 tipos de pessoas: as que entendem binário e as que não entendem.',
-      'Funciona na minha máquina ¯\\_(ツ)_/¯ — então vamos mandar a máquina pra produção!',
+      'Funciona na minha máquina ¯\\_(ツ)_/¯, então vamos mandar a máquina pra produção!',
       'Um SQL entra num bar, vai até duas mesas e pergunta: "Posso me juntar a vocês?"',
     ],
     fallback: [
@@ -60,7 +60,7 @@ const TEXTS: Record<Language, Texts> = {
     jokes: [
       'Why did the JavaScript developer go to therapy? Too many issues with "this" 😅',
       'There are 10 kinds of people: those who understand binary and those who don’t.',
-      'It works on my machine ¯\\_(ツ)_/¯ — so let’s ship my machine to production!',
+      'It works on my machine ¯\\_(ツ)_/¯, so let’s ship my machine to production!',
       'A SQL query walks into a bar, goes up to two tables and asks: "Can I join you?"',
     ],
     fallback: [
