@@ -14,6 +14,7 @@ import { DemoBadge } from '../../shared/components/DemoBadge'
 import { Icon } from '../../shared/components/Icon'
 import { LanguageSwitcher } from '../../shared/components/LanguageSwitcher'
 import { ThemeToggle } from '../../shared/components/ThemeToggle'
+import { useDocumentTitle } from '../../shared/hooks/use-document-title'
 import './LoginScreen.css'
 
 interface LoginScreenProps {
@@ -39,6 +40,7 @@ const COLOR_KEYS = {
 export function LoginScreen({ transport, onLoggedIn, theme, onToggleTheme }: LoginScreenProps) {
   const { t } = useTranslation(['auth', 'common'])
   const [nickname, setNickname] = useState('')
+  useDocumentTitle('', 0)
   const [color, setColor] = useState<string>(AVATAR_COLORS[0])
   const [error, setError] = useState<ErrorInfo | null>(null)
   const errorText = useErrorText()

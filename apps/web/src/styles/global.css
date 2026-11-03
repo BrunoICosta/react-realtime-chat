@@ -118,6 +118,16 @@ textarea {
   color: inherit;
 }
 
+/*
+ * iOS Safari zooms into any focused field smaller than 16px and does not zoom back out.
+ * Keeping form controls at 16px+ avoids that without disabling pinch-zoom.
+ */
+input,
+select,
+textarea {
+  font-size: max(16px, 1rem);
+}
+
 button {
   cursor: pointer;
 }

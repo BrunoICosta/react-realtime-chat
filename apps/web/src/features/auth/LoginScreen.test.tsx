@@ -50,6 +50,12 @@ describe('<LoginScreen />', () => {
     expect(screen.getByRole('button', { name: 'Entrar no chat' })).toBeEnabled()
   })
 
+  it('shows the Portuguese app name in the heading and the tab title', () => {
+    setup()
+    expect(screen.getByRole('heading', { name: 'Chat em Tempo Real' })).toBeInTheDocument()
+    expect(document.title).toBe('Chat em Tempo Real')
+  })
+
   it('explains the demo mode when there is no server', () => {
     setup(vi.fn(), 'demo')
     expect(screen.getByText('modo demo')).toBeInTheDocument()

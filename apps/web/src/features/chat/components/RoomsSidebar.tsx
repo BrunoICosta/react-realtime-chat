@@ -26,8 +26,11 @@ export function RoomsSidebar({ onNavigate }: RoomsSidebarProps) {
         <span className="sidebar__logo" aria-hidden="true">
           <Icon name="sparkles" size={18} />
         </span>
-        <span className="sidebar__title">{t('common:appName')}</span>
-        {mode === 'demo' && <DemoBadge />}
+        {/* Title and badge wrap onto two lines when the (longer pt-BR) name does not fit. */}
+        <span className="sidebar__heading-group">
+          <span className="sidebar__title">{t('common:appName')}</span>
+          {mode === 'demo' && <DemoBadge />}
+        </span>
       </div>
 
       <div className="sidebar__section">

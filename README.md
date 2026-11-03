@@ -1,4 +1,4 @@
-# Realtime Chat
+# Chat em Tempo Real
 
 🇧🇷 Português · [🇺🇸 English](README.en.md)
 
@@ -17,7 +17,7 @@ um segundo transporte que simula o backend dentro do navegador (abas conversam e
 
 - **Login sem cadastro**: apelido + cor do avatar; o servidor emite um **JWT** (HS256, 12h).
 - **Salas**: `#geral`, `#dev` e `#random` por padrão, criação de novas salas, sair da sala.
-- **Badges de não lidas** por sala e contador no título da aba (`(3) #geral · Realtime Chat`).
+- **Badges de não lidas** por sala e contador no título da aba (`(3) #geral · Chat em Tempo Real`).
 - **Mensagens agrupadas** por autor (janela de 5 min) e por dia (Hoje, Ontem, 12 de setembro).
 - **Envio otimista**: a mensagem aparece na hora, é reconciliada pelo `clientId` e pode ser
   reenviada se falhar.

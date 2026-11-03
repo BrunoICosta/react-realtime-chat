@@ -1,7 +1,7 @@
 /** Source of truth for the UI texts; `en.ts` must provide exactly the same keys. */
 export const ptBR = {
   common: {
-    appName: 'Realtime Chat',
+    appName: 'Chat em Tempo Real',
     language: {
       label: 'Idioma',
     },

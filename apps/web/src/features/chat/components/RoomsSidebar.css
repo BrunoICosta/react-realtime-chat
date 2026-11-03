@@ -25,6 +25,16 @@
   color: #fff;
 }
 
+.sidebar__heading-group {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 2px 8px;
+  min-width: 0;
+  padding: 8px 0;
+}
+
 .sidebar__title {
   font-weight: 800;
   letter-spacing: -0.01em;
